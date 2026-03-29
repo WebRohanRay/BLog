@@ -18,12 +18,12 @@ const sourceSans = Source_Sans_3({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Spice & Simmer | Indian-American Fusion Recipes',
+    default: 'Spice & Simmer | Indian Flavors, Global Inspirations',
     template: '%s | Spice & Simmer',
   },
-  description: 'Bold, flavorful Indian-American fusion recipes for busy home cooks. Easy weeknight dinners, meal prep ideas, and delicious comfort food with a spicy twist.',
-  keywords: ['indian recipes', 'american fusion', 'easy recipes', 'weeknight dinners', 'spicy food', 'comfort food'],
-  authors: [{ name: 'Priya Sharma' }],
+  description: 'Discover bold, flavorful recipes that blend Indian culinary traditions with flavors from around the world. Easy weeknight dinners, meal prep ideas, and global comfort food.',
+  keywords: ['indian recipes', 'global fusion', 'easy recipes', 'weeknight dinners', 'world cuisine', 'Indian fusion cooking'],
+  authors: [{ name: 'Admin' }],
   creator: 'Spice & Simmer',
   publisher: 'Spice & Simmer',
   formatDetection: {
@@ -37,21 +37,21 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: '/',
     siteName: 'Spice & Simmer',
-    title: 'Spice & Simmer | Indian-American Fusion Recipes',
-    description: 'Bold, flavorful Indian-American fusion recipes for busy home cooks.',
+    title: 'Spice & Simmer | Indian Flavors, Global Inspirations',
+    description: 'Bold, flavorful recipes that blend Indian culinary traditions with flavors from around the world.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Spice & Simmer - Indian-American Fusion Recipes',
+        alt: 'Spice & Simmer - Indian Flavors, Global Inspirations',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Spice & Simmer | Indian-American Fusion Recipes',
-    description: 'Bold, flavorful Indian-American fusion recipes for busy home cooks.',
+    title: 'Spice & Simmer | Indian Flavors, Global Inspirations',
+    description: 'Bold, flavorful recipes that blend Indian culinary traditions with flavors from around the world.',
     images: ['/og-image.jpg'],
   },
   robots: {

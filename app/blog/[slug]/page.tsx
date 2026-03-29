@@ -8,9 +8,9 @@ import { RecipeCard } from '@/components/recipe/recipe-card'
 import { Newsletter } from '@/components/newsletter'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Clock, User, ArrowLeft } from 'lucide-react'
-import { fetchBlogBySlug, fetchRelatedRecipes, fetchRelatedBlogs } from '@/lib/api'
-// import { blogs } from '@/lib/dummy-data'
+import { fetchBlogBySlug, fetchRelatedRecipes, fetchRelatedBlogs, fetchAllBlogs, fetchCommentsByBlogId } from '@/lib/api'
 import { BlogCard } from '@/components/blog/blog-card'
+import { CommentSection } from '@/components/recipe/comment-section'
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>
@@ -43,11 +43,14 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
 }
 
 export async function generateStaticParams() {
-  return blogs
-    .filter(b => b.status === 'published')
-    .map((blog) => ({
+  try {
+    const blogs = await fetchAllBlogs()
+    return blogs.map((blog) => ({
       slug: blog.slug,
     }))
+  } catch {
+    return []
+  }
 }
 
 export default async function BlogPostPage({ params }: BlogPageProps) {
@@ -58,9 +61,10 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
     notFound()
   }
 
-  const [relatedRecipes, relatedBlogs] = await Promise.all([
+  const [relatedRecipes, relatedBlogs, comments] = await Promise.all([
     fetchRelatedRecipes(blog.relatedRecipes),
     fetchRelatedBlogs(blog.relatedBlogs),
+    fetchCommentsByBlogId(blog.id),
   ])
 
   return (
@@ -117,11 +121,11 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
             <div className="flex items-center gap-1.5">
               <User className="w-4 h-4" />
-              <span>{blog.author.name}</span>
+              <span>{typeof blog.author === 'string' ? blog.author : (blog.author as any)?.name || 'Admin'}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="w-4 h-4" />
-              <span>{blog.readingTime} min read</span>
+              <span>{(blog as any).readTime || blog.readingTime || '5 min read'}</span>
             </div>
             <span>
               {new Date(blog.publishedAt).toLocaleDateString('en-US', {
@@ -152,6 +156,11 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
           {/* Newsletter */}
           <div className="my-12">
             <Newsletter />
+          </div>
+
+          {/* Comments */}
+          <div className="my-12">
+            <CommentSection blogId={blog.id} comments={comments} />
           </div>
 
           {/* Related Recipes */}

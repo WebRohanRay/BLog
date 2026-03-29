@@ -107,7 +107,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <ChefHat className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <span className="font-serif font-bold text-foreground">Spice & Simmer</span>
+              <span className="font-serif font-bold text-foreground">Spice &amp; Simmer</span>
               <p className="text-xs text-muted-foreground">Admin Panel</p>
             </div>
           </div>

@@ -30,7 +30,7 @@ export default async function AdminDashboardPage() {
       title: 'Blog Posts',
       value: stats.blogCount,
       icon: FileText,
-      href: '/admin/blogs',
+      href: '/admin/blog',
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
     },
@@ -71,7 +71,7 @@ export default async function AdminDashboardPage() {
               New Recipe
             </Button>
           </Link>
-          <Link href="/admin/blogs/new">
+          <Link href="/admin/blog/new">
             <Button variant="outline">
               <Plus className="w-4 h-4 mr-2" />
               New Post

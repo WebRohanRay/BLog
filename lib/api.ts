@@ -13,10 +13,14 @@ import {
   limit as limitFn,
   addDoc,
   setDoc,
+  updateDoc,
   deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore'
 import { categories as dummyCategories, type Recipe, type Category, type Tag, type Blog, type Comment } from './dummy-data'
+
+// Re-export types so components can import from @/lib/api
+export type { Recipe, Category, Tag, Blog, Comment }
 
 // Recipe APIs
 export async function fetchRecipeBySlug(slug: string): Promise<Recipe | null> {
@@ -58,6 +62,19 @@ export async function fetchRecipesByTag(tagSlug: string): Promise<Recipe[]> {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
 }
 
+export async function updateRecipe(id: string, recipeData: any): Promise<void> {
+  const docRef = doc(db, 'recipes', id)
+  await updateDoc(docRef, {
+    ...recipeData,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export async function deleteRecipe(id: string): Promise<void> {
+  const docRef = doc(db, 'recipes', id)
+  await deleteDoc(docRef)
+}
+
 export async function fetchAllRecipes(includeDrafts: boolean = false): Promise<Recipe[]> {
   const recipesRef = collection(db, 'recipes')
   const q = includeDrafts 
@@ -65,6 +82,24 @@ export async function fetchAllRecipes(includeDrafts: boolean = false): Promise<R
     : query(recipesRef, where('status', '==', 'published'))
   const snapshot = await getDocs(q)
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
+}
+
+export async function fetchRecipesPaginated(
+  page: number = 1,
+  perPage: number = 9,
+  includeDrafts: boolean = false
+): Promise<{ recipes: Recipe[]; total: number; totalPages: number }> {
+  const recipesRef = collection(db, 'recipes')
+  const q = includeDrafts 
+    ? query(recipesRef, orderBy('createdAt', 'desc'))
+    : query(recipesRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
+  const total = all.length
+  const totalPages = Math.max(1, Math.ceil(total / perPage))
+  const safePage = Math.min(Math.max(1, page), totalPages)
+  const recipes = all.slice((safePage - 1) * perPage, safePage * perPage)
+  return { recipes, total, totalPages }
 }
 
 export async function createRecipe(recipeData: Omit<Recipe, 'id'>): Promise<string> {
@@ -145,17 +180,64 @@ export async function fetchLatestBlogs(limit: number = 3): Promise<Blog[]> {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
 }
 
-export async function fetchAllBlogs(): Promise<Blog[]> {
-  const q = query(collection(db, 'blogs'), where('status', '==', 'published'))
+export async function fetchAllBlogs(includeDrafts: boolean = false): Promise<Blog[]> {
+  const blogsRef = collection(db, 'blogs')
+  const q = includeDrafts 
+    ? query(blogsRef, orderBy('createdAt', 'desc'))
+    : query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'))
   const snapshot = await getDocs(q)
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
 }
 
+export async function fetchBlogsPaginated(
+  page: number = 1,
+  perPage: number = 9
+): Promise<{ blogs: Blog[]; total: number; totalPages: number }> {
+  const blogsRef = collection(db, 'blogs')
+  const q = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+  const total = all.length
+  const totalPages = Math.max(1, Math.ceil(total / perPage))
+  const safePage = Math.min(Math.max(1, page), totalPages)
+  const blogs = all.slice((safePage - 1) * perPage, safePage * perPage)
+  return { blogs, total, totalPages }
+}
+
 export async function fetchRelatedBlogs(blogIds: string[]): Promise<Blog[]> {
-  if (!blogIds.length) return []
+  if (!blogIds || !blogIds.length) return []
   const q = query(collection(db, 'blogs'), where('__name__', 'in', blogIds))
   const snapshot = await getDocs(q)
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+}
+
+export async function fetchBlogById(id: string): Promise<Blog | null> {
+  const docRef = doc(db, 'blogs', id)
+  const docSnap = await getDoc(docRef)
+  if (!docSnap.exists()) return null
+  return { id: docSnap.id, ...docSnap.data() } as Blog
+}
+
+export async function createBlog(blogData: any): Promise<string> {
+  const docRef = await addDoc(collection(db, 'blogs'), {
+    ...blogData,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+  return docRef.id
+}
+
+export async function updateBlog(id: string, blogData: any): Promise<void> {
+  const docRef = doc(db, 'blogs', id)
+  await updateDoc(docRef, {
+    ...blogData,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export async function deleteBlog(id: string): Promise<void> {
+  const docRef = doc(db, 'blogs', id)
+  await deleteDoc(docRef)
 }
 
 // Comment APIs
@@ -165,8 +247,15 @@ export async function fetchCommentsByRecipeId(recipeId: string): Promise<Comment
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment))
 }
 
+export async function fetchCommentsByBlogId(blogId: string): Promise<Comment[]> {
+  const q = query(collection(db, 'comments'), where('blogId', '==', blogId), where('status', '==', 'approved'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment))
+}
+
 export async function submitComment(data: {
-  recipeId: string
+  recipeId?: string
+  blogId?: string
   name: string
   email: string
   comment: string
@@ -178,6 +267,17 @@ export async function submitComment(data: {
     createdAt: serverTimestamp(),
   })
   return { success: true, message: 'Comment submitted for review!' }
+}
+
+export async function fetchAllComments(): Promise<Comment[]> {
+  const q = query(collection(db, 'comments'), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment))
+}
+
+export async function updateCommentStatus(id: string, status: 'approved' | 'rejected'): Promise<void> {
+  const docRef = doc(db, 'comments', id)
+  await updateDoc(docRef, { status, updatedAt: serverTimestamp() })
 }
 
 // Newsletter APIs

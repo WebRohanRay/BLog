@@ -11,11 +11,12 @@ import { cn } from '@/lib/utils'
 import type { Comment } from '@/lib/api'
 
 interface CommentSectionProps {
-  recipeId: string
+  recipeId?: string
+  blogId?: string
   comments: Comment[]
 }
 
-export function CommentSection({ recipeId, comments }: CommentSectionProps) {
+export function CommentSection({ recipeId, blogId, comments }: CommentSectionProps) {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -31,7 +32,8 @@ export function CommentSection({ recipeId, comments }: CommentSectionProps) {
 
     try {
       const result = await submitComment({
-        recipeId,
+        ...(recipeId ? { recipeId } : {}),
+        ...(blogId ? { blogId } : {}),
         ...formData,
       })
       if (result.success) {

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { ImageUpload } from '@/components/admin/image-upload'
-import { createBlog } from '@/lib/api'
+import { fetchBlogById, updateBlog } from '@/lib/api'
 
 const blogCategories = [
   'Cooking Tips',
@@ -23,9 +23,13 @@ const blogCategories = [
   'Seasonal Cooking',
 ]
 
-export default function NewBlogPostPage() {
+export default function EditBlogPostPage() {
   const router = useRouter()
+  const params = useParams()
+  const id = params.id as string
+
   const [loading, setLoading] = useState(false)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -38,6 +42,43 @@ export default function NewBlogPostPage() {
     status: 'draft',
     author: 'Admin',
   })
+
+  useEffect(() => {
+    const fetchBlogPost = async () => {
+      try {
+        const blogPost = await fetchBlogById(id)
+        if (!blogPost) {
+          toast.error('Blog post not found')
+          router.push('/admin/blog')
+          return
+        }
+
+        setFormData({
+          title: blogPost.title || '',
+          slug: blogPost.slug || '',
+          category: (blogPost as any).category || '',
+          excerpt: blogPost.excerpt || '',
+          content: blogPost.content || '',
+          image: blogPost.image || '',
+          imagePublicId: (blogPost as any).imagePublicId || '',
+          metaDescription: blogPost.metaDescription || '',
+          status: blogPost.status || 'draft',
+          author: typeof blogPost.author === 'string' 
+            ? blogPost.author 
+            : ((blogPost.author as any)?.name || 'Admin'),
+        })
+      } catch (error) {
+        console.error('Error fetching blog post:', error)
+        toast.error('Failed to load blog post')
+      } finally {
+        setInitialLoad(false)
+      }
+    }
+
+    if (id) {
+      fetchBlogPost()
+    }
+  }, [id, router])
 
   const generateSlug = (title: string) => {
     return title
@@ -65,22 +106,24 @@ export default function NewBlogPostPage() {
         return
       }
 
-      await createBlog({
+      await updateBlog(id, {
         ...formData,
         readTime: Math.ceil(formData.content.length / 1000) + ' min read',
-        stats: { likes: 0, views: 0 },
-        tags: [],
         publishedAt: formData.status === 'published' ? new Date().toISOString() : null,
       })
 
-      toast.success('Blog post created successfully!')
+      toast.success('Blog post updated successfully!')
       router.push('/admin/blog')
     } catch (error) {
-      console.error('Error creating blog post:', error)
-      toast.error('Failed to create blog post')
+      console.error('Error updating blog post:', error)
+      toast.error('Failed to update blog post')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (initialLoad) {
+    return <div className="p-8 text-center flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
   }
 
   return (
@@ -94,10 +137,10 @@ export default function NewBlogPostPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-serif font-bold text-foreground">
-            New Blog Post
+            Edit Blog Post
           </h1>
           <p className="text-muted-foreground text-sm">
-            Create a new article for your blog
+            Modify your existing article
           </p>
         </div>
       </div>
@@ -136,21 +179,21 @@ export default function NewBlogPostPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  list="blog-category-suggestions"
+                <Select
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Select or type a category..."
-                />
-                <datalist id="blog-category-suggestions">
-                  {blogCategories.map((cat) => (
-                    <option key={cat} value={cat} />
-                  ))}
-                </datalist>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Choose from the list or type your own
-                </p>
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {blogCategories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="author">Author</Label>
@@ -224,7 +267,7 @@ export default function NewBlogPostPage() {
                 rows={2}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                {formData.metaDescription.length}/160 characters
+                {formData.metaDescription?.length || 0}/160 characters
               </p>
             </div>
 
@@ -255,12 +298,12 @@ export default function NewBlogPostPage() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                Updating...
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save Post
+                Update Post
               </>
             )}
           </Button>

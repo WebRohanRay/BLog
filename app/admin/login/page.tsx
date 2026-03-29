@@ -64,7 +64,7 @@ export default function AdminLoginPage() {
             Admin Login
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Sign in to manage Spice & Simmer
+            Sign in to manage Spice &amp; Simmer
           </p>
         </div>
 
@@ -198,7 +198,7 @@ export default function AdminLoginPage() {
         {/* Back to site */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
           <Link href="/" className="text-primary hover:underline">
-            Back to Spice & Simmer
+            Back to Spice &amp; Simmer
           </Link>
         </p>
       </div>

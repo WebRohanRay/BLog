@@ -47,7 +47,7 @@ export default function ContactPage() {
               Get in Touch
             </h1>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Have a question, suggestion, or just want to say hello? I&apos;d love to hear from you!
+              Have a question, suggestion, or just want to say hello? We&apos;d love to hear from you!
             </p>
           </div>
 
@@ -60,7 +60,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Email</h3>
-                  <p className="text-sm text-muted-foreground">hello@spiceandsimmer.com</p>
+                  <p className="text-sm text-muted-foreground">Webrohanray@gmail.com</p>
                 </div>
               </div>
 
@@ -70,7 +70,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Based In</h3>
-                  <p className="text-sm text-muted-foreground">San Francisco, California</p>
+                  <p className="text-sm text-muted-foreground">Worldwide</p>
                 </div>
               </div>
 
@@ -87,7 +87,7 @@ export default function ContactPage() {
               <div className="pt-4">
                 <h3 className="font-semibold text-foreground mb-2">Collaboration</h3>
                 <p className="text-sm text-muted-foreground">
-                  Interested in working together? I&apos;m open to brand partnerships, recipe development, and sponsored content that aligns with Spice & Simmer&apos;s values.
+                  Interested in working together? We're open to brand partnerships, recipe development, and sponsored content that aligns with Spice &amp; Simmer's values.
                 </p>
               </div>
             </div>

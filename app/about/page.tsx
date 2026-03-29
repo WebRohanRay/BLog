@@ -1,12 +1,14 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Newsletter } from '@/components/newsletter'
+import { ChefHat, Globe, BookOpen, Sparkles } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: 'Meet Priya Sharma, the passionate home cook behind Spice & Simmer. Learn about our mission to bring bold Indian-American fusion flavors to busy home cooks.',
+  description: 'Learn about Spice & Simmer — our mission is to make Indian food approachable, exciting and globally inspired for every home cook.',
 }
 
 export default function AboutPage() {
@@ -15,62 +17,104 @@ export default function AboutPage() {
       <Header />
       <main className="flex-1">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
           {/* Hero */}
           <div className="text-center mb-12">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
-              About Spice & Simmer
+              About Spice &amp; Simmer
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Where bold Indian spices meet American comfort food
+              Making Indian food familiar, exciting, and accessible to everyone — with a touch of the world
             </p>
           </div>
 
-          {/* Author Image */}
-          <div className="relative w-48 h-48 sm:w-64 sm:h-64 mx-auto mb-8 rounded-full overflow-hidden border-4 border-primary/20">
+          {/* Hero Image */}
+          <div className="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-12 border border-border">
             <Image
-              src="https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400&h=400&fit=crop"
-              alt="Priya Sharma - Spice & Simmer founder"
+              src="https://images.unsplash.com/photo-1556911220-bff31c812dba?w=900&h=400&fit=crop"
+              alt="Indian spices and cooking ingredients"
               fill
               className="object-cover"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+              <p className="text-white font-serif text-xl font-semibold">
+                "Indian flavors, inspired by the world"
+              </p>
+            </div>
           </div>
 
           {/* Content */}
-          <div className="prose prose-lg max-w-none prose-headings:font-serif">
-            <h2>Hi, I&apos;m Priya!</h2>
+          <div className="prose prose-lg max-w-none prose-headings:font-serif mb-12">
+            <h2>Our Story</h2>
             <p>
-              Welcome to Spice & Simmer! I&apos;m a first-generation Indian-American who grew up watching my mother transform simple ingredients into aromatic feasts. Now, as a busy professional and home cook, I&apos;ve made it my mission to bridge the gap between traditional Indian flavors and the practical needs of American home cooking.
+              Spice &amp; Simmer was born from a simple belief: Indian food is one of the most flavour-rich, 
+              deeply satisfying cuisines on earth — and it deserves to be enjoyed by everyone, everywhere. 
+              We combine traditional Indian techniques and spices with ideas drawn from kitchens all around 
+              the world, creating dishes that feel both deeply familiar and wonderfully new.
             </p>
 
             <h2>Our Philosophy</h2>
             <p>
-              I believe that bold, flavorful food shouldn&apos;t require hours in the kitchen or a trip to specialty stores. Every recipe here is designed with busy home cooks in mind — people who want exciting meals without the fuss. I take the vibrant spices and techniques from Indian cuisine and merge them with American comfort food favorites.
+              Great food should not require a culinary degree or a specialty ingredient shop. Every recipe 
+              here is designed to be achievable in a home kitchen, using spices and produce you can find 
+              at any good grocery store. We believe that bold flavour and everyday cooking can — and should — 
+              go hand in hand.
             </p>
             <p>
-              The result? Butter Chicken Tacos. Tikka Masala Mac and Cheese. Masala Chai Brownies. Dishes that feel familiar yet exciting, comforting yet adventurous.
+              The result is food that surprises you. Dishes that carry the warmth of an Indian kitchen but 
+              borrow from Thai, Mediterranean, Mexican, Japanese, and other global traditions to create 
+              something entirely their own.
             </p>
 
             <h2>What You&apos;ll Find Here</h2>
-            <ul>
-              <li><strong>Fusion Recipes:</strong> Creative combinations that blend the best of both culinary worlds</li>
-              <li><strong>Step-by-Step Guides:</strong> Detailed instructions with photos so you can cook with confidence</li>
-              <li><strong>Time-Saving Tips:</strong> Meal prep strategies and shortcuts that don&apos;t compromise on flavor</li>
-              <li><strong>Spice Education:</strong> Learn how to use Indian spices to transform any dish</li>
-            </ul>
+          </div>
 
-            <h2>My Promise to You</h2>
-            <p>
-              Every recipe on Spice & Simmer is tested multiple times in my home kitchen. I use ingredients you can find at your regular grocery store. And I never publish a recipe that I wouldn&apos;t proudly serve to my own family.
-            </p>
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+            {[
+              {
+                icon: ChefHat,
+                title: 'Authentic Indian Roots',
+                desc: 'Every recipe starts with true Indian flavours — the spices, techniques and soul that make this cuisine so special.'
+              },
+              {
+                icon: Globe,
+                title: 'Global Inspirations',
+                desc: 'We draw from cuisines around the world to create fusion dishes that are exciting, fresh and endlessly interesting.'
+              },
+              {
+                icon: BookOpen,
+                title: 'Step-by-Step Guides',
+                desc: 'Clear, detailed instructions with tips at every stage so you can cook with confidence, whatever your skill level.'
+              },
+              {
+                icon: Sparkles,
+                title: 'Spice Education',
+                desc: 'Learn how Indian spices work and how to use them to transform any dish — Indian or otherwise.'
+              },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex gap-4 p-5 bg-muted/50 rounded-xl border border-border">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-1">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
 
-            <h2>Let&apos;s Connect</h2>
+          <div className="prose prose-lg max-w-none prose-headings:font-serif mb-12">
+            <h2>Our Promise</h2>
             <p>
-              I love hearing from fellow food lovers! Whether you have a question about a recipe, want to share your cooking wins, or just want to say hi, drop me a message through the{' '}
-              <a href="/contact" className="text-primary hover:underline">contact page</a>.
+              Every recipe published here is tested in a real home kitchen. We only publish recipes we 
+              would be proud to serve to family and friends. Honest food, honestly made.
             </p>
             <p>
-              Happy cooking!<br />
-              <em>— Priya</em>
+              Have a question or want to share your experience?{' '}
+              <Link href="/contact" className="text-primary hover:underline">Get in touch</Link> — 
+              we love hearing from fellow food lovers.
             </p>
           </div>
 

@@ -1,33 +1,64 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, X, Star, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-// import { comments, recipes } from '@/lib/dummy-data'
+import { fetchAllComments, updateCommentStatus, fetchAllRecipes } from '@/lib/api'
+import type { Comment, Recipe } from '@/lib/dummy-data'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 export default function AdminCommentsPage() {
-  const [commentList, setCommentList] = useState(comments)
+  const [commentList, setCommentList] = useState<Comment[]>([])
+  const [recipesList, setRecipesList] = useState<Recipe[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const handleApprove = (id: string) => {
-    setCommentList((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: 'approved' as const } : c))
-    )
-    toast.success('Comment approved')
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [fetchedComments, fetchedRecipes] = await Promise.all([
+          fetchAllComments(),
+          fetchAllRecipes(true)
+        ])
+        setCommentList(fetchedComments)
+        setRecipesList(fetchedRecipes)
+      } catch (error) {
+        toast.error('Failed to load comments')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const handleApprove = async (id: string) => {
+    try {
+      await updateCommentStatus(id, 'approved')
+      setCommentList((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: 'approved' as const } : c))
+      )
+      toast.success('Comment approved')
+    } catch {
+      toast.error('Failed to approve comment')
+    }
   }
 
-  const handleReject = (id: string) => {
-    setCommentList((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: 'rejected' as const } : c))
-    )
-    toast.success('Comment rejected')
+  const handleReject = async (id: string) => {
+    try {
+      await updateCommentStatus(id, 'rejected')
+      setCommentList((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: 'rejected' as const } : c))
+      )
+      toast.success('Comment rejected')
+    } catch {
+      toast.error('Failed to reject comment')
+    }
   }
 
   const getRecipeTitle = (recipeId: string) => {
-    const recipe = recipes.find((r) => r.id === recipeId)
+    const recipe = recipesList.find((r) => r.id === recipeId)
     return recipe?.title || 'Unknown Recipe'
   }
 
@@ -90,7 +121,7 @@ export default function AdminCommentsPage() {
 }
 
 interface CommentListProps {
-  comments: typeof comments
+  comments: Comment[]
   onApprove?: (id: string) => void
   onReject?: (id: string) => void
   getRecipeTitle: (id: string) => string

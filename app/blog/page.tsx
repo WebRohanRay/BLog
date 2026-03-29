@@ -2,15 +2,24 @@ import { Metadata } from 'next'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { BlogCard } from '@/components/blog/blog-card'
-import { fetchAllBlogs } from '@/lib/api'
+import { Pagination } from '@/components/ui/pagination'
+import { fetchBlogsPaginated } from '@/lib/api'
 
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'Tips, stories, and cooking guides to help you master Indian-American fusion cooking. Learn techniques, discover ingredients, and get inspired.',
 }
 
-export default async function BlogPage() {
-  const blogs = await fetchAllBlogs()
+interface BlogPageProps {
+  searchParams: Promise<{ page?: string }>
+}
+
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const { page: pageParam } = await searchParams
+  const currentPage = Math.max(1, parseInt(pageParam || '1', 10))
+  const PER_PAGE = 9
+
+  const { blogs, total, totalPages } = await fetchBlogsPaginated(currentPage, PER_PAGE)
 
   return (
     <>
@@ -27,12 +36,30 @@ export default async function BlogPage() {
             </p>
           </div>
 
+          {/* Stats row */}
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-sm text-muted-foreground">
+              {total} article{total !== 1 ? 's' : ''}
+            </p>
+            {totalPages > 1 && (
+              <p className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </p>
+            )}
+          </div>
+
           {/* Blog Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {blogs.map((blog) => (
               <BlogCard key={blog.id} blog={blog} />
             ))}
           </div>
+
+          {blogs.length === 0 && (
+            <p className="text-center text-muted-foreground py-16">No blog posts found.</p>
+          )}
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/blog" />
         </div>
       </main>
       <Footer />

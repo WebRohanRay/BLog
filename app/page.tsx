@@ -33,7 +33,7 @@ export default async function HomePage() {
         <section className="relative min-h-[60vh] sm:min-h-[70vh] flex items-center">
           <Image
             src="https://images.unsplash.com/photo-1596797038530-2c107229654b?w=1600&h=900&fit=crop"
-            alt="Spice & Simmer - Indian-American fusion cooking"
+            alt="Indo-Universe - Indian flavors with global inspirations"
             fill
             className="object-cover"
             priority
@@ -42,13 +42,13 @@ export default async function HomePage() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <div className="max-w-2xl">
               <span className="inline-block px-3 py-1 text-xs sm:text-sm font-medium bg-primary text-primary-foreground rounded-full mb-4">
-                Indian-American Fusion
+                Indian Flavors, Global Inspirations
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-6xl font-serif font-bold text-white mb-4 sm:mb-6 leading-tight">
-                Bold Flavors for Busy Home Cooks
+                Where Indian Cooking Meets the World
               </h1>
               <p className="text-base sm:text-xl text-white/90 mb-6 sm:mb-8 max-w-xl leading-relaxed">
-                Discover delicious Indian-American fusion recipes that bring exciting spices to your everyday cooking. Fast, flavorful meals in 30 minutes or less.
+                Discover bold recipes that blend the rich traditions of Indian cooking with exciting flavors from every corner of the globe. Delicious meals for every occasion.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link href="/recipes">

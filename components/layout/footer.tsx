@@ -11,9 +11,9 @@ const footerLinks = {
   ],
   explore: [
     { href: '/blog', label: 'Blog' },
-    { href: '/tags/quick-easy', label: 'Quick & Easy' },
-    { href: '/tags/vegetarian', label: 'Vegetarian' },
-    { href: '/tags/meal-prep', label: 'Meal Prep' },
+    { href: '/recipes/main-dishes', label: 'Main Dishes' },
+    { href: '/recipes/appetizers', label: 'Appetizers' },
+    { href: '/recipes/desserts', label: 'Desserts' },
   ],
   about: [
     { href: '/about', label: 'About Us' },
@@ -26,7 +26,7 @@ const socialLinks = [
   { href: 'https://instagram.com', icon: Instagram, label: 'Instagram' },
   { href: 'https://facebook.com', icon: Facebook, label: 'Facebook' },
   { href: 'https://youtube.com', icon: Youtube, label: 'YouTube' },
-  { href: 'mailto:hello@spiceandsimmer.com', icon: Mail, label: 'Email' },
+  { href: 'mailto:hello@indo-universe.com', icon: Mail, label: 'Email' },
 ]
 
 export function Footer() {
@@ -42,11 +42,11 @@ export function Footer() {
                 <ChefHat className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="font-serif text-lg font-bold text-foreground">
-                Spice & Simmer
+                Spice &amp; Simmer
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              Bold, flavorful Indian-American fusion recipes for busy home cooks.
+              Bold, flavorful recipes combining Indian culinary traditions with flavors from around the world.
             </p>
             {/* Social Links */}
             <div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground text-center">
-            &copy; {new Date().getFullYear()} Spice & Simmer. All rights reserved.
+            &copy; {new Date().getFullYear()} Spice &amp; Simmer. All rights reserved.
           </p>
         </div>
       </div>

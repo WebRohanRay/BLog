@@ -3,16 +3,25 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { RecipeCard } from '@/components/recipe/recipe-card'
 import { CategoryCard } from '@/components/recipe/category-card'
-import { fetchAllRecipes, fetchAllCategories } from '@/lib/api'
+import { Pagination } from '@/components/ui/pagination'
+import { fetchRecipesPaginated, fetchAllCategories } from '@/lib/api'
 
 export const metadata: Metadata = {
   title: 'All Recipes',
   description: 'Browse our collection of bold, flavorful Indian-American fusion recipes. From quick weeknight dinners to impressive weekend dishes.',
 }
 
-export default async function RecipesPage() {
-  const [recipes, categories] = await Promise.all([
-    fetchAllRecipes(),
+interface RecipesPageProps {
+  searchParams: Promise<{ page?: string }>
+}
+
+export default async function RecipesPage({ searchParams }: RecipesPageProps) {
+  const { page: pageParam } = await searchParams
+  const currentPage = Math.max(1, parseInt(pageParam || '1', 10))
+  const PER_PAGE = 9
+
+  const [{ recipes, total, totalPages }, categories] = await Promise.all([
+    fetchRecipesPaginated(currentPage, PER_PAGE),
     fetchAllCategories(),
   ])
 
@@ -47,14 +56,28 @@ export default async function RecipesPage() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg sm:text-xl font-semibold text-foreground">
-                All Recipes ({recipes.length})
+                All Recipes ({total})
               </h2>
+              <p className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </p>
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {recipes.map((recipe, index) => (
-                <RecipeCard key={recipe.id} recipe={recipe} priority={index < 3} />
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  priority={index < 3 && currentPage === 1}
+                />
               ))}
             </div>
+
+            {recipes.length === 0 && (
+              <p className="text-center text-muted-foreground py-16">No recipes found.</p>
+            )}
+
+            <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/recipes" />
           </section>
         </div>
       </main>

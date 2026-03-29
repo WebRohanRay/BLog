@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useEffect, useState } from 'react'
-import { fetchAllRecipes } from '@/lib/api'
+import { fetchAllRecipes, deleteRecipe } from '@/lib/api'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -40,8 +40,7 @@ export default function AdminRecipesPage() {
     if (!window.confirm('Are you sure you want to delete this recipe?')) return
     setDeletingId(id)
     try {
-      const response = await fetch(`/api/recipes/${id}`, { method: 'DELETE' })
-      if (!response.ok) throw new Error('Failed to delete recipe')
+      await deleteRecipe(id)
       setRecipeList((prev) => prev.filter((r) => r.id !== id))
       toast.success('Recipe deleted successfully!')
     } catch (error) {

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { fetchRecipeById, fetchAllCategories } from '@/lib/api'
+import { fetchRecipeById, fetchAllCategories, updateRecipe } from '@/lib/api'
 import { ImageUpload } from '@/components/admin/image-upload'
 // Firebase imports
 // import { db } from '@/lib/firebase'
@@ -42,6 +42,7 @@ export default function EditRecipePage({ params }: PageProps) {
     description: '',
     ingredients: [{ item: '', amount: '', unit: '' }],
     steps: [{ phase: 'prep', title: '', description: '', tip: '' }],
+    nutrition: { calories: '', protein: '', carbs: '', fat: '' },
   })
 
   const [categories, setCategories] = useState<any[]>([])
@@ -79,6 +80,12 @@ export default function EditRecipePage({ params }: PageProps) {
               description: step.description,
               tip: step.tip || ''
             })) || [{ phase: 'prep', title: '', description: '', tip: '' }],
+            nutrition: recipe.nutrition ? {
+              calories: recipe.nutrition.calories?.toString() ?? '',
+              protein: recipe.nutrition.protein?.toString() ?? '',
+              carbs: recipe.nutrition.carbs?.toString() ?? '',
+              fat: recipe.nutrition.fat?.toString() ?? '',
+            } : { calories: '', protein: '', carbs: '', fat: '' },
           })
         }
       } catch (error) {
@@ -136,19 +143,39 @@ export default function EditRecipePage({ params }: PageProps) {
     setLoading(true)
 
     try {
-      // API call to update recipe
-      const response = await fetch(`/api/recipes/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          prepTime: parseInt(formData.prepTime),
-          cookTime: parseInt(formData.cookTime),
-          servings: parseInt(formData.servings),
-        }),
-      })
+      if (!formData.title || !formData.category || !formData.image) {
+        toast.error('Please fill all required fields including image.')
+        setLoading(false)
+        return
+      }
 
-      if (!response.ok) throw new Error('Failed to update recipe')
+      await updateRecipe(id, {
+        title: formData.title,
+        description: formData.metaDescription || '',
+        category: formData.category,
+        difficulty: formData.difficulty as any,
+        prepTime: formData.prepTime || '0',
+        cookTime: formData.cookTime || '0',
+        servings: formData.servings || '1',
+        totalTime: String((Number(formData.prepTime) || 0) + (Number(formData.cookTime) || 0)),
+        status: formData.status as any,
+        featured: formData.featured,
+        tags: [formData.category],
+        image: formData.image,
+        imagePublicId: formData.imagePublicId,
+        metaDescription: formData.metaDescription || '',
+        ingredients: formData.ingredients,
+        steps: formData.steps.map((step, index) => ({
+          ...step,
+          stepNumber: index + 1
+        })),
+        nutrition: {
+          calories: parseInt(formData.nutrition.calories) || 0,
+          protein: parseInt(formData.nutrition.protein) || 0,
+          carbs: parseInt(formData.nutrition.carbs) || 0,
+          fat: parseInt(formData.nutrition.fat) || 0,
+        },
+      })
 
       toast.success('Recipe updated successfully!')
       router.push('/admin/recipes')
@@ -404,6 +431,73 @@ export default function EditRecipePage({ params }: PageProps) {
                 />
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        {/* Nutrition */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Nutrition Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor="calories">Calories</Label>
+                <Input
+                  id="calories"
+                  type="number"
+                  value={formData.nutrition.calories}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, calories: e.target.value }
+                  })}
+                  placeholder="e.g., 350"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="protein">Protein (g)</Label>
+                <Input
+                  id="protein"
+                  type="number"
+                  value={formData.nutrition.protein}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, protein: e.target.value }
+                  })}
+                  placeholder="e.g., 25"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="carbs">Carbs (g)</Label>
+                <Input
+                  id="carbs"
+                  type="number"
+                  value={formData.nutrition.carbs}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, carbs: e.target.value }
+                  })}
+                  placeholder="e.g., 40"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="fat">Fat (g)</Label>
+                <Input
+                  id="fat"
+                  type="number"
+                  value={formData.nutrition.fat}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, fat: e.target.value }
+                  })}
+                  placeholder="e.g., 15"
+                  className="mt-1"
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
