@@ -46,6 +46,11 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            <Link href="/admin/login">
+              <Button variant="outline" size="sm" className="ml-2">
+                Admin Login
+              </Button>
+            </Link>
           </div>
 
           {/* Right side - Search & Mobile Menu */}
@@ -98,6 +103,13 @@ export function Header() {
               className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
             >
               Contact
+            </Link>
+            <Link
+              href="/admin/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 text-base font-medium text-primary hover:text-primary-foreground hover:bg-primary/80 rounded-lg transition-colors"
+            >
+              Admin Login
             </Link>
           </div>
         </div>
