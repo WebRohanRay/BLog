@@ -88,7 +88,7 @@ export function Header() {
         {/* Mobile Navigation Drawer */}
         <div
           className={cn(
-            'lg:hidden overflow-hidden transition-all duration-300 ease-in-out',
+            'lg:hidden overflow-hidden transition-all duration-1000 ease-in-out',
             mobileMenuOpen ? 'max-h-[32rem] pb-4' : 'max-h-0'
           )}
         >
