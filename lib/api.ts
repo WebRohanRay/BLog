@@ -174,10 +174,25 @@ export async function fetchBlogBySlug(slug: string): Promise<Blog | null> {
   return { id: docSnap.id, ...docSnap.data() } as Blog
 }
 
-export async function fetchLatestBlogs(limit: number = 3): Promise<Blog[]> {
-  const q = query(collection(db, 'blogs'), where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
+export async function fetchLatestBlogs(limit: number = 3, featuredOnly: boolean = false): Promise<Blog[]> {
+  const blogsRef = collection(db, 'blogs')
+  let q = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
+  
+  if (featuredOnly) {
+    q = query(blogsRef, where('status', '==', 'published'), where('featured', '==', true), orderBy('createdAt', 'desc'), limitFn(limit))
+  }
+  
   const snapshot = await getDocs(q)
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+  const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+  
+  // If we asked for featured but didn't find enough, fallback to latest (optional, but requested in plan)
+  if (featuredOnly && results.length < limit) {
+    const fallbackQ = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
+    const fallbackSnapshot = await getDocs(fallbackQ)
+    return fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+  }
+  
+  return results
 }
 
 export async function fetchAllBlogs(includeDrafts: boolean = false): Promise<Blog[]> {

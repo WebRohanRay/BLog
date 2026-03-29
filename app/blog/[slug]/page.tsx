@@ -11,6 +11,8 @@ import { Clock, User, ArrowLeft } from 'lucide-react'
 import { fetchBlogBySlug, fetchRelatedRecipes, fetchRelatedBlogs, fetchAllBlogs, fetchCommentsByBlogId } from '@/lib/api'
 import { BlogCard } from '@/components/blog/blog-card'
 import { CommentSection } from '@/components/recipe/comment-section'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>
@@ -19,7 +21,7 @@ interface BlogPageProps {
 export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
   const { slug } = await params
   const blog = await fetchBlogBySlug(slug)
-  
+
   if (!blog) {
     return { title: 'Blog Post Not Found' }
   }
@@ -148,8 +150,8 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
           </div>
 
           {/* Content */}
-          <div
-            className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+          <div 
+            className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl"
             dangerouslySetInnerHTML={{ __html: blog.content }}
           />
 

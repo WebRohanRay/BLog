@@ -10,8 +10,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { ImageUpload } from '@/components/admin/image-upload'
+import { RecipePicker } from '@/components/admin/recipe-picker'
 import { createBlog } from '@/lib/api'
 
 const blogCategories = [
@@ -26,6 +28,7 @@ const blogCategories = [
 export default function NewBlogPostPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [relatedRecipes, setRelatedRecipes] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -36,6 +39,7 @@ export default function NewBlogPostPage() {
     imagePublicId: '',
     metaDescription: '',
     status: 'draft',
+    featured: true,
     author: 'Admin',
   })
 
@@ -67,6 +71,7 @@ export default function NewBlogPostPage() {
 
       await createBlog({
         ...formData,
+        relatedRecipes,
         readTime: Math.ceil(formData.content.length / 1000) + ' min read',
         stats: { likes: 0, views: 0 },
         tags: [],
@@ -196,15 +201,31 @@ export default function NewBlogPostPage() {
               <Textarea
                 id="content"
                 value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                placeholder="Write your blog post content here... (Markdown supported)"
+                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Write your blog post content here..."
                 rows={15}
-                className="font-mono text-sm"
+                className="font-mono text-sm border-2 focus:border-primary"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Supports Markdown formatting
+              <p className="text-xs text-muted-foreground mt-2">
+                Paste your content here. You can use HTML tags for formatting.
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Linked Recipes */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Linked Recipes</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Link related recipes so readers can jump directly to them from this post.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <RecipePicker
+              selectedIds={relatedRecipes}
+              onChange={setRelatedRecipes}
+            />
           </CardContent>
         </Card>
 
@@ -224,8 +245,27 @@ export default function NewBlogPostPage() {
                 rows={2}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                {formData.metaDescription.length}/160 characters
+                Brief description for search engines (150-160 characters)
               </p>
+            </div>
+
+            <div className="flex items-center space-x-2 py-2">
+              <Checkbox 
+                id="featured" 
+                checked={formData.featured}
+                onCheckedChange={(checked) => setFormData({ ...formData, featured: !!checked })}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label
+                  htmlFor="featured"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Show on Homepage
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Pin this post to the &quot;From the Blog&quot; section on the front page.
+                </p>
+              </div>
             </div>
 
             <div>

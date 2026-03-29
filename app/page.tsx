@@ -22,7 +22,7 @@ export default async function HomePage() {
     fetchFeaturedRecipes(),
     fetchLatestRecipes(6),
     fetchAllCategories(),
-    fetchLatestBlogs(3),
+    fetchLatestBlogs(3, true),
   ])
 
   return (

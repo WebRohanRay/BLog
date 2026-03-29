@@ -10,8 +10,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { ImageUpload } from '@/components/admin/image-upload'
+import { RecipePicker } from '@/components/admin/recipe-picker'
 import { fetchBlogById, updateBlog } from '@/lib/api'
 
 const blogCategories = [
@@ -30,6 +32,7 @@ export default function EditBlogPostPage() {
 
   const [loading, setLoading] = useState(false)
   const [initialLoad, setInitialLoad] = useState(true)
+  const [relatedRecipes, setRelatedRecipes] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -40,6 +43,7 @@ export default function EditBlogPostPage() {
     imagePublicId: '',
     metaDescription: '',
     status: 'draft',
+    featured: false,
     author: 'Admin',
   })
 
@@ -63,10 +67,13 @@ export default function EditBlogPostPage() {
           imagePublicId: (blogPost as any).imagePublicId || '',
           metaDescription: blogPost.metaDescription || '',
           status: blogPost.status || 'draft',
-          author: typeof blogPost.author === 'string' 
-            ? blogPost.author 
+          featured: (blogPost as any).featured || false,
+          author: typeof blogPost.author === 'string'
+            ? blogPost.author
             : ((blogPost.author as any)?.name || 'Admin'),
         })
+        // Load previously linked recipes
+        setRelatedRecipes((blogPost as any).relatedRecipes || [])
       } catch (error) {
         console.error('Error fetching blog post:', error)
         toast.error('Failed to load blog post')
@@ -108,6 +115,7 @@ export default function EditBlogPostPage() {
 
       await updateBlog(id, {
         ...formData,
+        relatedRecipes,
         readTime: Math.ceil(formData.content.length / 1000) + ' min read',
         publishedAt: formData.status === 'published' ? new Date().toISOString() : null,
       })
@@ -179,21 +187,18 @@ export default function EditBlogPostPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select
+                <Input
+                  id="category"
+                  list="edit-blog-category-suggestions"
                   value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {blogCategories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  placeholder="Select or type a category..."
+                />
+                <datalist id="edit-blog-category-suggestions">
+                  {blogCategories.map((cat) => (
+                    <option key={cat} value={cat} />
+                  ))}
+                </datalist>
               </div>
               <div>
                 <Label htmlFor="author">Author</Label>
@@ -228,7 +233,6 @@ export default function EditBlogPostPage() {
           </CardContent>
         </Card>
 
-        {/* Content */}
         <Card>
           <CardHeader>
             <CardTitle>Content</CardTitle>
@@ -239,15 +243,31 @@ export default function EditBlogPostPage() {
               <Textarea
                 id="content"
                 value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                placeholder="Write your blog post content here... (Markdown supported)"
+                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Write your blog post content here..."
                 rows={15}
-                className="font-mono text-sm"
+                className="font-mono text-sm border-2 focus:border-primary"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Supports Markdown formatting
+              <p className="text-xs text-muted-foreground mt-2">
+                Paste your content here. You can use HTML tags for formatting.
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Linked Recipes */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Linked Recipes</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Link related recipes so readers can jump directly to them from this post.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <RecipePicker
+              selectedIds={relatedRecipes}
+              onChange={setRelatedRecipes}
+            />
           </CardContent>
         </Card>
 
@@ -267,8 +287,27 @@ export default function EditBlogPostPage() {
                 rows={2}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                {formData.metaDescription?.length || 0}/160 characters
+                Brief description for search engines (150-160 characters)
               </p>
+            </div>
+
+            <div className="flex items-center space-x-2 py-2">
+              <Checkbox 
+                id="featured" 
+                checked={formData.featured}
+                onCheckedChange={(checked) => setFormData({ ...formData, featured: !!checked })}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label
+                  htmlFor="featured"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Show on Homepage
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Pin this post to the &quot;From the Blog&quot; section on the front page.
+                </p>
+              </div>
             </div>
 
             <div>

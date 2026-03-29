@@ -82,6 +82,7 @@ export interface Blog {
   image: string
   readingTime: number
   status: 'draft' | 'published'
+  featured: boolean
   relatedRecipes: string[]
   relatedBlogs: string[]
   createdAt: string
@@ -855,6 +856,7 @@ export const blogs: Blog[] = [
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=1200&h=800&fit=crop',
     readingTime: 8,
     status: 'published',
+    featured: true,
     relatedRecipes: ['1', '2', '3'],
     relatedBlogs: ['2'],
     createdAt: '2024-01-10T10:00:00Z',
@@ -888,6 +890,7 @@ export const blogs: Blog[] = [
     image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop',
     readingTime: 6,
     status: 'published',
+    featured: true,
     relatedRecipes: ['1', '5'],
     relatedBlogs: ['1', '3'],
     createdAt: '2024-01-25T10:00:00Z',
@@ -897,6 +900,7 @@ export const blogs: Blog[] = [
     id: '3',
     title: 'Meal Prep Sunday: Indian Fusion Edition',
     slug: 'meal-prep-sunday-indian-fusion-edition',
+    featured: true,
     content: `<p>Meal prepping doesn't have to mean boring chicken and broccoli. With a little planning, you can enjoy flavorful Indian-American fusion meals all week long.</p>
 
 <h2>The Strategy</h2>
