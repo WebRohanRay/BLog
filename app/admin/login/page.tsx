@@ -136,15 +136,16 @@ export default function AdminLoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
-                  Email Address
+                  Admin Email
                 </label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@spiceandsimmer.com"
+                  placeholder="Webrohanray@gmail.com"
                   required
+                  autoComplete="username"
                 />
               </div>
 
@@ -187,32 +188,11 @@ export default function AdminLoginPage() {
                 Sign In
               </Button>
 
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setResetMode(true)}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot your password?
-                </button>
-              </div>
+              {/* No sign up or extra actions for non-admins */}
             </form>
           )}
 
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center mb-2">
-              Demo Credentials
-            </p>
-            <div className="bg-muted/50 rounded-lg p-3 text-sm">
-              <p className="text-muted-foreground">
-                <span className="font-medium text-foreground">Email:</span> admin@spiceandsimmer.com
-              </p>
-              <p className="text-muted-foreground">
-                <span className="font-medium text-foreground">Password:</span> admin123
-              </p>
-            </div>
-          </div>
+          {/* No demo credentials shown. Only admin can log in. */}
         </div>
 
         {/* Back to site */}

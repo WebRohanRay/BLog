@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Plus, Edit, Trash2, Loader2, Save } from 'lucide-react'
@@ -11,8 +12,9 @@ import { toast } from 'sonner'
 import { categories as dummyCategories } from '@/lib/dummy-data'
 
 export default function AdminCategoriesPage() {
+  const { isAdmin, loading } = useAuth();
   const [categories, setCategories] = useState(dummyCategories)
-  const [loading, setLoading] = useState(false)
+  const [formLoading, setFormLoading] = useState(false)
   const [form, setForm] = useState({ name: '', slug: '' })
   const [editing, setEditing] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
@@ -27,7 +29,7 @@ export default function AdminCategoriesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setFormLoading(true)
     try {
       if (editing) {
         // Update category (dummy)
@@ -44,7 +46,7 @@ export default function AdminCategoriesPage() {
     } catch {
       toast.error('Failed to save category')
     } finally {
-      setLoading(false)
+      setFormLoading(false)
     }
   }
 
@@ -59,6 +61,12 @@ export default function AdminCategoriesPage() {
     toast.success('Category deleted!')
   }
 
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[300px]">Loading...</div>;
+  }
+  if (!isAdmin) {
+    return <div className="flex items-center justify-center min-h-[300px] text-destructive font-bold text-lg">Access denied: Admins only</div>;
+  }
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -120,8 +128,8 @@ export default function AdminCategoriesPage() {
               </div>
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={() => { setFormOpen(false); setEditing(null); }}>Cancel</Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                <Button type="submit" disabled={formLoading}>
+                  {formLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   {editing ? 'Update' : 'Add'}
                 </Button>
               </div>

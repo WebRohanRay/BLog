@@ -13,6 +13,7 @@ import { auth } from './firebase'
 interface AuthContextType {
   user: User | null
   loading: boolean
+  isAdmin: boolean
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
@@ -22,8 +23,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // For demo purposes - in production, remove this and use real Firebase auth
 const DEMO_MODE = true
+const ADMIN_EMAILS = ['Webrohanray@gmail.com']
 const DEMO_CREDENTIALS = {
-  email: 'admin@spiceandsimmer.com',
+  email: 'Webrohanray@gmail.com',
   password: 'admin123'
 }
 
@@ -84,8 +86,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await sendPasswordResetEmail(auth, email)
   }
 
+  // Only allow admin user
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email || '')
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   )
