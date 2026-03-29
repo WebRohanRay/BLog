@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useId } from 'react'
 import Image from 'next/image'
 import { Upload, X, Loader2, ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,8 @@ export function ImageUpload({
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const uniqueId = useId()
+  const inputId = `image-upload-${uniqueId}`
 
   const aspectRatioClass = {
     square: 'aspect-square',
@@ -112,30 +114,37 @@ export function ImageUpload({
         accept="image/*"
         onChange={handleFileChange}
         className="sr-only"
-        id="image-upload"
+        id={inputId}
       />
 
       {value ? (
-        <div className={cn('relative rounded-lg overflow-hidden border border-border', aspectRatioClass[aspectRatio])}>
-          <Image
-            src={value}
-            alt="Uploaded image"
-            fill
-            className="object-cover"
-          />
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            className="absolute top-2 right-2 h-8 w-8"
-            onClick={handleRemove}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+        <div className="space-y-2">
+          <div className={cn('relative rounded-lg overflow-hidden border-4 border-green-500 bg-muted flex items-center justify-center min-h-[200px]', aspectRatioClass[aspectRatio])}>
+            <img
+              src={value}
+              alt="Uploaded preview"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8 z-10"
+              onClick={handleRemove}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="bg-green-500/10 text-green-600 p-2 rounded-md border border-green-500/20 text-xs break-all">
+            <strong>Upload Successful!</strong><br />
+            <a href={value} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-700">
+              {value}
+            </a>
+          </div>
         </div>
       ) : (
         <label
-          htmlFor="image-upload"
+          htmlFor={inputId}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}

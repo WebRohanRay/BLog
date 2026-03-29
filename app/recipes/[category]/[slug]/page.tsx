@@ -23,7 +23,7 @@ import {
   Star
 } from 'lucide-react'
 import { fetchRecipeBySlug, fetchRelatedRecipes, fetchCommentsByRecipeId } from '@/lib/api'
-import { recipes } from '@/lib/dummy-data'
+
 
 interface RecipePageProps {
   params: Promise<{ category: string; slug: string }>
@@ -60,20 +60,33 @@ export async function generateMetadata({ params }: RecipePageProps): Promise<Met
 }
 
 export async function generateStaticParams() {
-  return recipes
-    .filter(r => r.status === 'published')
-    .map((recipe) => ({
-      category: recipe.category,
-      slug: recipe.slug,
-    }))
+  const { fetchAllRecipes } = await import('@/lib/api')
+  const recipes = await fetchAllRecipes()
+  return recipes.map((recipe: any) => ({
+    category: recipe.category,
+    slug: recipe.slug,
+  }))
 }
 
 export default async function RecipePage({ params }: RecipePageProps) {
   const { slug } = await params
-  const recipe = await fetchRecipeBySlug(slug)
+  const rawRecipe = await fetchRecipeBySlug(slug)
 
-  if (!recipe) {
+  if (!rawRecipe) {
     notFound()
+  }
+
+  // Ensure all array/object properties exist with safe fallbacks
+  const recipe = {
+    ...rawRecipe,
+    tips: rawRecipe.tips || [],
+    mistakes: rawRecipe.mistakes || [],
+    variations: rawRecipe.variations || [],
+    faqs: rawRecipe.faqs || [],
+    steps: (rawRecipe.steps || []).map((step: any, idx: number) => ({ ...step, stepNumber: idx + 1 })),
+    relatedRecipes: rawRecipe.relatedRecipes || [],
+    nutrition: rawRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    stats: (rawRecipe as any).stats || { views: 0, likes: 0, cookCount: 0 }
   }
 
   const [relatedRecipes, comments] = await Promise.all([
@@ -189,15 +202,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
               {/* Quick Actions */}
               <div className="flex flex-wrap gap-2 mb-6">
-                <Button variant="outline" size="sm" className="min-h-[44px]">
+                <Button variant="outline" size="sm" className="min-h-11">
                   <Printer className="w-4 h-4 mr-2" />
                   Print
                 </Button>
-                <Button variant="outline" size="sm" className="min-h-[44px]">
+                <Button variant="outline" size="sm" className="min-h-11">
                   <Share2 className="w-4 h-4 mr-2" />
                   Share
                 </Button>
-                <Button variant="outline" size="sm" className="min-h-[44px]">
+                <Button variant="outline" size="sm" className="min-h-11">
                   <BookmarkPlus className="w-4 h-4 mr-2" />
                   Save
                 </Button>
@@ -248,7 +261,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
               </p>
 
               {/* Ad Slot */}
-              <div className="min-h-[90px] bg-muted rounded-xl flex items-center justify-center text-muted-foreground text-sm mb-8">
+              <div className="min-h-22.5 bg-muted rounded-xl flex items-center justify-center text-muted-foreground text-sm mb-8">
                 Ad Space
               </div>
 
@@ -258,7 +271,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
               </section>
 
               {/* Ad Slot */}
-              <div className="min-h-[90px] bg-muted rounded-xl flex items-center justify-center text-muted-foreground text-sm mb-8">
+              <div className="min-h-22.5 bg-muted rounded-xl flex items-center justify-center text-muted-foreground text-sm mb-8">
                 Ad Space
               </div>
 
@@ -276,7 +289,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                   <ul className="space-y-2">
                     {recipe.tips.map((tip, index) => (
                       <li key={index} className="flex items-start gap-3 text-sm sm:text-base text-muted-foreground">
-                        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 text-xs font-medium mt-0.5">
+                        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 text-xs font-medium mt-0.5">
                           {index + 1}
                         </span>
                         {tip}
@@ -295,7 +308,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                   <ul className="space-y-2">
                     {recipe.mistakes.map((mistake, index) => (
                       <li key={index} className="flex items-start gap-3 text-sm sm:text-base text-muted-foreground">
-                        <span className="w-6 h-6 rounded-full bg-destructive/10 text-destructive flex items-center justify-center flex-shrink-0 text-xs">
+                        <span className="w-6 h-6 rounded-full bg-destructive/10 text-destructive flex items-center justify-center shrink-0 text-xs">
                           !
                         </span>
                         {mistake}
@@ -314,7 +327,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                   <ul className="space-y-2">
                     {recipe.variations.map((variation, index) => (
                       <li key={index} className="flex items-start gap-3 text-sm sm:text-base text-muted-foreground">
-                        <Star className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                        <Star className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                         {variation}
                       </li>
                     ))}
@@ -382,7 +395,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             {/* Sidebar */}
             <aside className="w-full lg:w-1/3 lg:sticky lg:top-24 lg:self-start">
               {/* Ad Slot */}
-              <div className="min-h-[250px] bg-muted rounded-xl flex items-center justify-center text-muted-foreground text-sm mb-6">
+              <div className="min-h-62.5 bg-muted rounded-xl flex items-center justify-center text-muted-foreground text-sm mb-6">
                 Sidebar Ad
               </div>
 

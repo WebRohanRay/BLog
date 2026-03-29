@@ -120,7 +120,7 @@ export default async function AdminDashboardPage() {
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3" />
-                        {recipe.viewCount.toLocaleString()}
+                        {(recipe.viewCount || (recipe as any).stats?.views || 0).toLocaleString()}
                       </span>
                       <span className="flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { categories, recipes as dummyRecipes } from '@/lib/dummy-data'
+import { fetchRecipeById, fetchAllCategories } from '@/lib/api'
 import { ImageUpload } from '@/components/admin/image-upload'
 // Firebase imports
 // import { db } from '@/lib/firebase'
@@ -44,53 +44,43 @@ export default function EditRecipePage({ params }: PageProps) {
     steps: [{ phase: 'prep', title: '', description: '', tip: '' }],
   })
 
+  const [categories, setCategories] = useState<any[]>([])
   useEffect(() => {
-    const fetchRecipe = async () => {
+    const fetchData = async () => {
+      setFetching(true)
       try {
-        // Using dummy data - replace with Firebase
-        const recipe = dummyRecipes.find(r => r.id === id)
-        
+        const [recipe, cats] = await Promise.all([
+          fetchRecipeById(id),
+          fetchAllCategories(),
+        ])
+        setCategories(cats)
         if (recipe) {
           setFormData({
             title: recipe.title,
             category: recipe.category,
             difficulty: recipe.difficulty,
-            prepTime: recipe.prepTime.toString(),
-            cookTime: recipe.cookTime.toString(),
-            servings: recipe.servings.toString(),
+            prepTime: recipe.prepTime?.toString() ?? '',
+            cookTime: recipe.cookTime?.toString() ?? '',
+            servings: recipe.servings?.toString() ?? '',
             featured: recipe.featured,
             status: recipe.status,
             image: recipe.image,
             imagePublicId: '',
             metaDescription: recipe.metaDescription || '',
-            description: recipe.description,
-            ingredients: recipe.ingredients.map(ing => ({
+            description: recipe.description || '',
+            ingredients: recipe.ingredients?.map(ing => ({
               item: ing.item,
               amount: ing.amount,
               unit: ing.unit || ''
-            })),
-            steps: recipe.steps.map(step => ({
+            })) || [{ item: '', amount: '', unit: '' }],
+            steps: recipe.steps?.map(step => ({
               phase: step.phase || 'cooking',
               title: step.title,
               description: step.description,
               tip: step.tip || ''
-            })),
+            })) || [{ phase: 'prep', title: '', description: '', tip: '' }],
           })
         }
-
-        /* Firebase implementation:
-        const docRef = doc(db, 'recipes', id)
-        const docSnap = await getDoc(docRef)
-        
-        if (docSnap.exists()) {
-          const recipe = docSnap.data()
-          setFormData({
-            title: recipe.title,
-            category: recipe.category,
-            // ... map all fields
-          })
-        }
-        */
       } catch (error) {
         console.error('Error fetching recipe:', error)
         toast.error('Failed to load recipe')
@@ -98,8 +88,7 @@ export default function EditRecipePage({ params }: PageProps) {
         setFetching(false)
       }
     }
-
-    fetchRecipe()
+    fetchData()
   }, [id])
 
   const addIngredient = () => {
@@ -173,7 +162,7 @@ export default function EditRecipePage({ params }: PageProps) {
 
   if (fetching) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )

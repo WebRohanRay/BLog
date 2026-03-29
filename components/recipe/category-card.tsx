@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import type { Category } from '@/lib/dummy-data'
+import type { Category } from '@/lib/api'
 
 interface CategoryCardProps {
   category: Category
@@ -27,7 +27,7 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
       />
       
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
       
       {/* Content */}
       <div className="absolute inset-0 flex items-end p-3 sm:p-4">

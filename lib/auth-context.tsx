@@ -22,7 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // For demo purposes - in production, remove this and use real Firebase auth
-const DEMO_MODE = true
+const DEMO_MODE = false
 const ADMIN_EMAILS = ['Webrohanray@gmail.com']
 const DEMO_CREDENTIALS = {
   email: 'Webrohanray@gmail.com',
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   // Only allow admin user
-  const isAdmin = user && ADMIN_EMAILS.includes(user.email || '')
+  const isAdmin = Boolean(user && user.email && ADMIN_EMAILS.some(e => e.toLowerCase() === user.email!.toLowerCase()))
 
   return (
     <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signOut, resetPassword }}>

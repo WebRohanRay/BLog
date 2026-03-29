@@ -1,108 +1,168 @@
 // API service layer - uses dummy data for now but structured for Firebase integration
 // When Firebase is configured, replace dummy data imports with Firestore queries
 
+import { db } from './firebase'
 import {
-  recipes,
-  categories,
-  tags,
-  blogs,
-  comments,
-  getRecipeBySlug,
-  getRecipeById,
-  getRecipesByCategory,
-  getFeaturedRecipes,
-  getLatestRecipes,
-  getRecipesByTag,
-  getCategoryBySlug,
-  getBlogBySlug,
-  getLatestBlogs,
-  getCommentsByRecipeId,
-  getRelatedRecipes,
-  getRelatedBlogs,
-  type Recipe,
-  type Category,
-  type Tag,
-  type Blog,
-  type Comment,
-} from './dummy-data'
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit as limitFn,
+  addDoc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { categories as dummyCategories, type Recipe, type Category, type Tag, type Blog, type Comment } from './dummy-data'
 
 // Recipe APIs
 export async function fetchRecipeBySlug(slug: string): Promise<Recipe | null> {
-  // TODO: Replace with Firestore query when Firebase is configured
-  // const docRef = doc(db, 'recipes', slug)
-  // const docSnap = await getDoc(docRef)
-  // return docSnap.exists() ? docSnap.data() as Recipe : null
-  
-  return getRecipeBySlug(slug) || null
+  const q = query(collection(db, 'recipes'), where('slug', '==', slug), where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  if (snapshot.empty) return null
+  const docSnap = snapshot.docs[0]
+  return { id: docSnap.id, ...docSnap.data() } as Recipe
 }
 
 export async function fetchRecipeById(id: string): Promise<Recipe | null> {
-  return getRecipeById(id) || null
+  const docRef = doc(db, 'recipes', id)
+  const docSnap = await getDoc(docRef)
+  if (!docSnap.exists()) return null
+  return { id: docSnap.id, ...docSnap.data() } as Recipe
 }
 
 export async function fetchRecipesByCategory(categorySlug: string): Promise<Recipe[]> {
-  // TODO: Replace with Firestore query
-  // const q = query(collection(db, 'recipes'), where('category', '==', categorySlug), where('status', '==', 'published'))
-  // const querySnapshot = await getDocs(q)
-  // return querySnapshot.docs.map(doc => doc.data() as Recipe)
-  
-  return getRecipesByCategory(categorySlug)
+  const q = query(collection(db, 'recipes'), where('category', '==', categorySlug), where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
 }
 
 export async function fetchFeaturedRecipes(): Promise<Recipe[]> {
-  return getFeaturedRecipes()
+  const q = query(collection(db, 'recipes'), where('featured', '==', true), where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
 }
 
 export async function fetchLatestRecipes(limit: number = 6): Promise<Recipe[]> {
-  return getLatestRecipes(limit)
+  const q = query(collection(db, 'recipes'), where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
 }
 
 export async function fetchRecipesByTag(tagSlug: string): Promise<Recipe[]> {
-  return getRecipesByTag(tagSlug)
+  const q = query(collection(db, 'recipes'), where('tags', 'array-contains', tagSlug), where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
 }
 
-export async function fetchAllRecipes(): Promise<Recipe[]> {
-  return recipes.filter(r => r.status === 'published')
+export async function fetchAllRecipes(includeDrafts: boolean = false): Promise<Recipe[]> {
+  const recipesRef = collection(db, 'recipes')
+  const q = includeDrafts 
+    ? query(recipesRef)
+    : query(recipesRef, where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
 }
 
-export async function fetchRelatedRecipes(recipeIds: string[]): Promise<Recipe[]> {
-  return getRelatedRecipes(recipeIds)
+export async function createRecipe(recipeData: Omit<Recipe, 'id'>): Promise<string> {
+  const docRef = await addDoc(collection(db, 'recipes'), {
+    ...recipeData,
+    createdAt: new Date().toISOString()
+  });
+  return docRef.id;
+}
+
+export async function fetchRelatedRecipes(recipeIds: string[] = []): Promise<Recipe[]> {
+  if (!recipeIds || !recipeIds.length) return []
+  const q = query(collection(db, 'recipes'), where('__name__', 'in', recipeIds))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
 }
 
 // Category APIs
 export async function fetchAllCategories(): Promise<Category[]> {
-  return categories
+  try {
+    const snapshot = await getDocs(collection(db, 'categories'))
+    if (!snapshot.empty) {
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category))
+    }
+  } catch (error) {
+    console.warn("Failed to fetch categories from Firebase, using dummy data.", error)
+  }
+  return dummyCategories
 }
 
 export async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
-  return getCategoryBySlug(slug) || null
+  const docRef = doc(db, 'categories', slug)
+  const docSnap = await getDoc(docRef)
+  if (!docSnap.exists()) {
+    // Fallback block if document ID pattern is different
+    const q = query(collection(db, 'categories'), where('slug', '==', slug))
+    const snapshot = await getDocs(q)
+    if (snapshot.empty) return null
+    const fallBackDoc = snapshot.docs[0]
+    return { id: fallBackDoc.id, ...fallBackDoc.data() } as Category
+  }
+  return { id: docSnap.id, ...docSnap.data() } as Category
+}
+
+export async function createCategory(category: Category): Promise<void> {
+  const docRef = doc(db, 'categories', category.slug)
+  await setDoc(docRef, category)
+}
+
+export async function updateCategory(slug: string, data: Partial<Category>): Promise<void> {
+  const docRef = doc(db, 'categories', slug)
+  await setDoc(docRef, data, { merge: true })
+}
+
+export async function deleteCategory(slug: string): Promise<void> {
+  const docRef = doc(db, 'categories', slug)
+  await deleteDoc(docRef)
 }
 
 // Tag APIs
 export async function fetchAllTags(): Promise<Tag[]> {
-  return tags
+  const snapshot = await getDocs(collection(db, 'tags'))
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Tag))
 }
 
 // Blog APIs
 export async function fetchBlogBySlug(slug: string): Promise<Blog | null> {
-  return getBlogBySlug(slug) || null
+  const q = query(collection(db, 'blogs'), where('slug', '==', slug), where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  if (snapshot.empty) return null
+  const docSnap = snapshot.docs[0]
+  return { id: docSnap.id, ...docSnap.data() } as Blog
 }
 
 export async function fetchLatestBlogs(limit: number = 3): Promise<Blog[]> {
-  return getLatestBlogs(limit)
+  const q = query(collection(db, 'blogs'), where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
 }
 
 export async function fetchAllBlogs(): Promise<Blog[]> {
-  return blogs.filter(b => b.status === 'published')
+  const q = query(collection(db, 'blogs'), where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
 }
 
 export async function fetchRelatedBlogs(blogIds: string[]): Promise<Blog[]> {
-  return getRelatedBlogs(blogIds)
+  if (!blogIds.length) return []
+  const q = query(collection(db, 'blogs'), where('__name__', 'in', blogIds))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
 }
 
 // Comment APIs
 export async function fetchCommentsByRecipeId(recipeId: string): Promise<Comment[]> {
-  return getCommentsByRecipeId(recipeId)
+  const q = query(collection(db, 'comments'), where('recipeId', '==', recipeId), where('status', '==', 'approved'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment))
 }
 
 export async function submitComment(data: {
@@ -112,28 +172,22 @@ export async function submitComment(data: {
   comment: string
   rating: number
 }): Promise<{ success: boolean; message: string }> {
-  // TODO: Add to Firestore when configured
-  // await addDoc(collection(db, 'comments'), {
-  //   ...data,
-  //   status: 'pending',
-  //   createdAt: serverTimestamp(),
-  // })
-  
-  console.log('Comment submitted:', data)
+  await addDoc(collection(db, 'comments'), {
+    ...data,
+    status: 'pending',
+    createdAt: serverTimestamp(),
+  })
   return { success: true, message: 'Comment submitted for review!' }
 }
 
 // Newsletter APIs
 export async function subscribeToNewsletter(email: string): Promise<{ success: boolean; message: string }> {
-  // TODO: Add to Firestore when configured
-  // await addDoc(collection(db, 'subscribers'), {
-  //   email,
-  //   confirmed: false,
-  //   confirmToken: crypto.randomUUID(),
-  //   createdAt: serverTimestamp(),
-  // })
-  
-  console.log('Newsletter subscription:', email)
+  await addDoc(collection(db, 'subscribers'), {
+    email,
+    confirmed: false,
+    confirmToken: crypto.randomUUID(),
+    createdAt: serverTimestamp(),
+  })
   return { success: true, message: 'Please check your email to confirm your subscription!' }
 }
 
@@ -143,27 +197,27 @@ export async function submitContactForm(data: {
   email: string
   message: string
 }): Promise<{ success: boolean; message: string }> {
-  // TODO: Add to Firestore when configured
-  // await addDoc(collection(db, 'contacts'), {
-  //   ...data,
-  //   createdAt: serverTimestamp(),
-  // })
-  
-  console.log('Contact form submitted:', data)
+  await addDoc(collection(db, 'contacts'), {
+    ...data,
+    createdAt: serverTimestamp(),
+  })
   return { success: true, message: 'Thank you for your message! We\'ll get back to you soon.' }
 }
 
 // Search API (placeholder - will use Pagefind in production)
-export async function searchRecipes(query: string): Promise<Recipe[]> {
-  const lowerQuery = query.toLowerCase()
-  return recipes.filter(r => 
-    r.status === 'published' && (
+export async function searchRecipes(queryStr: string): Promise<Recipe[]> {
+  // Firestore does not support full text search natively; this is a simple implementation
+  const q = query(collection(db, 'recipes'), where('status', '==', 'published'))
+  const snapshot = await getDocs(q)
+  const lowerQuery = queryStr.toLowerCase()
+  return snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() } as Recipe))
+    .filter(r =>
       r.title.toLowerCase().includes(lowerQuery) ||
       r.metaDescription.toLowerCase().includes(lowerQuery) ||
-      r.keywords.some(k => k.toLowerCase().includes(lowerQuery)) ||
-      r.ingredients.some(i => i.item.toLowerCase().includes(lowerQuery))
+      (r.keywords && r.keywords.some((k: string) => k.toLowerCase().includes(lowerQuery))) ||
+      (r.ingredients && r.ingredients.some((i: any) => i.item.toLowerCase().includes(lowerQuery)))
     )
-  )
 }
 
 // Admin APIs (for future use)
@@ -173,10 +227,16 @@ export async function fetchAdminStats(): Promise<{
   subscriberCount: number
   pendingComments: number
 }> {
+  const [recipesSnap, blogsSnap, subsSnap, commentsSnap] = await Promise.all([
+    getDocs(collection(db, 'recipes')),
+    getDocs(collection(db, 'blogs')),
+    getDocs(collection(db, 'subscribers')),
+    getDocs(query(collection(db, 'comments'), where('status', '==', 'pending'))),
+  ])
   return {
-    recipeCount: recipes.length,
-    blogCount: blogs.length,
-    subscriberCount: 1247, // Dummy count
-    pendingComments: comments.filter(c => c.status === 'pending').length,
+    recipeCount: recipesSnap.size,
+    blogCount: blogsSnap.size,
+    subscriberCount: subsSnap.size,
+    pendingComments: commentsSnap.size,
   }
 }

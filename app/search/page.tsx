@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { dummyRecipes, dummyCategories } from '@/lib/dummy-data'
+// import { recipes, categories } from '@/lib/dummy-data'
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -23,10 +23,10 @@ function SearchContent() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([])
   const [maxTime, setMaxTime] = useState<number | null>(null)
-  const [results, setResults] = useState(dummyRecipes)
+  const [results, setResults] = useState(recipes)
 
   useEffect(() => {
-    let filtered = dummyRecipes
+    let filtered = recipes
 
     // Filter by search query
     if (query) {
@@ -152,7 +152,7 @@ function SearchContent() {
                 <div>
                   <h4 className="font-medium mb-3 text-sm text-muted-foreground uppercase tracking-wide">Categories</h4>
                   <div className="space-y-2">
-                    {dummyCategories.map(category => (
+                    {categories.map(category => (
                       <div key={category.slug} className="flex items-center gap-2">
                         <Checkbox
                           id={`cat-${category.slug}`}
@@ -216,7 +216,7 @@ function SearchContent() {
           {hasActiveFilters && (
             <div className="flex flex-wrap gap-2 mb-6">
               {selectedCategories.map(cat => {
-                const category = dummyCategories.find(c => c.slug === cat)
+                const category = categories.find(c => c.slug === cat)
                 return (
                   <Badge key={cat} variant="secondary" className="flex items-center gap-1 py-1 px-3">
                     {category?.name}

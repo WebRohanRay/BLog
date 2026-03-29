@@ -9,7 +9,7 @@ import { Newsletter } from '@/components/newsletter'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Clock, User, ArrowLeft } from 'lucide-react'
 import { fetchBlogBySlug, fetchRelatedRecipes, fetchRelatedBlogs } from '@/lib/api'
-import { blogs } from '@/lib/dummy-data'
+// import { blogs } from '@/lib/dummy-data'
 import { BlogCard } from '@/components/blog/blog-card'
 
 interface BlogPageProps {

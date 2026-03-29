@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dummyRecipes } from '@/lib/dummy-data'
+// import { dummyRecipes } from '@/lib/dummy-data'
 // Firebase imports for when you're ready to use real data
 // import { db } from '@/lib/firebase'
 // import { doc, getDoc, updateDoc, deleteDoc, increment } from 'firebase/firestore'

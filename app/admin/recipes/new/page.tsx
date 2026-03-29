@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Trash2, GripVertical, Loader2, Save } from 'lucide-react'
@@ -12,12 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { categories } from '@/lib/dummy-data'
+import { fetchAllCategories, createRecipe } from '@/lib/api'
 import { ImageUpload } from '@/components/admin/image-upload'
 
 export default function NewRecipePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [categories, setCategories] = useState<any[]>([])
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -32,7 +33,20 @@ export default function NewRecipePage() {
     metaDescription: '',
     ingredients: [{ item: '', amount: '', unit: '' }],
     steps: [{ phase: 'prep', title: '', description: '', tip: '' }],
+    nutrition: { calories: '', protein: '', carbs: '', fat: '' },
   })
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await fetchAllCategories()
+        setCategories(cats)
+      } catch {
+        toast.error('Failed to load categories')
+      }
+    }
+    loadCategories()
+  }, [])
 
   const addIngredient = () => {
     setFormData({
@@ -78,12 +92,63 @@ export default function NewRecipePage() {
     e.preventDefault()
     setLoading(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      if (!formData.title || !formData.category || !formData.image) {
+        toast.error('Please fill all required fields including image.')
+        setLoading(false)
+        return
+      }
 
-    toast.success('Recipe created successfully!')
-    setLoading(false)
-    router.push('/admin/recipes')
+      const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+      await createRecipe({
+        ...formData,
+        slug,
+        title: formData.title,
+        description: formData.metaDescription || '',
+        image: formData.image,
+        category: formData.category,
+        difficulty: formData.difficulty as any,
+        prepTime: formData.prepTime || '0',
+        cookTime: formData.cookTime || '0',
+        servings: formData.servings || '1',
+        totalTime: String((Number(formData.prepTime) || 0) + (Number(formData.cookTime) || 0)),
+        status: formData.status as any,
+        featured: formData.featured,
+        tags: [formData.category], // Just mapped from category for now
+        ingredients: formData.ingredients,
+        steps: formData.steps.map((step, index) => ({
+          ...step,
+          stepNumber: index + 1
+        })),
+        nutrition: {
+          calories: parseInt(formData.nutrition.calories) || 0,
+          protein: parseInt(formData.nutrition.protein) || 0,
+          carbs: parseInt(formData.nutrition.carbs) || 0,
+          fat: parseInt(formData.nutrition.fat) || 0,
+        },
+        author: {
+          name: 'Admin',
+          avatar: '',
+        },
+        stats: {
+          likes: 0,
+          views: 0,
+          cookCount: 0,
+        },
+        ratingAvg: 0,
+        ratingCount: 0,
+        createdAt: new Date().toISOString()
+      } as any)
+
+      toast.success('Recipe created successfully!')
+      router.push('/admin/recipes')
+    } catch (e: any) {
+      toast.error('Failed to create recipe: ' + (e.message || 'Unknown error'))
+      console.error('Submission Error:', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -100,7 +165,7 @@ export default function NewRecipePage() {
             New Recipe
           </h1>
           <p className="text-muted-foreground text-sm">
-            Create a new recipe for your blog
+            Add a new recipe to your collection.
           </p>
         </div>
       </div>
@@ -197,8 +262,8 @@ export default function NewRecipePage() {
               <Label>Recipe Image</Label>
               <ImageUpload
                 value={formData.image}
-                onChange={(url) => setFormData({ ...formData, image: url })}
-                onPublicIdChange={(id) => setFormData({ ...formData, imagePublicId: id })}
+                onChange={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+                onPublicIdChange={(id) => setFormData((prev) => ({ ...prev, imagePublicId: id }))}
                 aspectRatio="video"
               />
             </div>
@@ -311,6 +376,73 @@ export default function NewRecipePage() {
                 />
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        {/* Nutrition */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Nutrition Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor="calories">Calories</Label>
+                <Input
+                  id="calories"
+                  type="number"
+                  value={formData.nutrition.calories}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, calories: e.target.value }
+                  })}
+                  placeholder="e.g., 350"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="protein">Protein (g)</Label>
+                <Input
+                  id="protein"
+                  type="number"
+                  value={formData.nutrition.protein}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, protein: e.target.value }
+                  })}
+                  placeholder="e.g., 25"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="carbs">Carbs (g)</Label>
+                <Input
+                  id="carbs"
+                  type="number"
+                  value={formData.nutrition.carbs}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, carbs: e.target.value }
+                  })}
+                  placeholder="e.g., 40"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="fat">Fat (g)</Label>
+                <Input
+                  id="fat"
+                  type="number"
+                  value={formData.nutrition.fat}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    nutrition: { ...formData.nutrition, fat: e.target.value }
+                  })}
+                  placeholder="e.g., 15"
+                  className="mt-1"
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
 

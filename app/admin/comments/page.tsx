@@ -5,7 +5,7 @@ import { Check, X, Star, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { comments, recipes } from '@/lib/dummy-data'
+// import { comments, recipes } from '@/lib/dummy-data'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 

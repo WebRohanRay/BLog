@@ -8,7 +8,7 @@ import { Star, Loader2, MessageSquare } from 'lucide-react'
 import { submitComment } from '@/lib/api'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import type { Comment } from '@/lib/dummy-data'
+import type { Comment } from '@/lib/api'
 
 interface CommentSectionProps {
   recipeId: string
@@ -55,7 +55,7 @@ export function CommentSection({ recipeId, comments }: CommentSectionProps) {
         <Button
           onClick={() => setShowForm(!showForm)}
           variant={showForm ? 'outline' : 'default'}
-          className="min-h-[44px]"
+          className="min-h-11"
         >
           <MessageSquare className="w-4 h-4 mr-2" />
           {showForm ? 'Cancel' : 'Leave a Review'}
@@ -105,7 +105,7 @@ export function CommentSection({ recipeId, comments }: CommentSectionProps) {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="min-h-[44px]"
+                className="min-h-11"
               />
             </div>
             <div>
@@ -118,7 +118,7 @@ export function CommentSection({ recipeId, comments }: CommentSectionProps) {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="min-h-[44px]"
+                className="min-h-11"
               />
             </div>
           </div>
@@ -138,7 +138,7 @@ export function CommentSection({ recipeId, comments }: CommentSectionProps) {
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="min-h-[44px]">
+          <Button type="submit" disabled={loading} className="min-h-11">
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

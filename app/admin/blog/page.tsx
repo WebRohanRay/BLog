@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { blogPosts } from '@/lib/dummy-data'
+// import { blogPosts } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {

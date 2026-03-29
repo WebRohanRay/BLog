@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, Users, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Recipe } from '@/lib/dummy-data'
+import type { Recipe } from '@/lib/api'
 
 interface RecipeCardProps {
   recipe: Recipe

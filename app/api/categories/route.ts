@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { categories as dummyCategories } from '@/lib/dummy-data'
+// import { categories as dummyCategories } from '@/lib/dummy-data'
+import { db } from '@/lib/firebase'
+import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore'
 // Firebase imports for real data
 // import { db } from '@/lib/firebase'
 // import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 
 export async function GET(request: NextRequest) {
   try {
-    // Dummy data
-    return NextResponse.json({ categories: dummyCategories })
-    /* Firebase example:
+    // Firestore implementation
     const snapshot = await getDocs(collection(db, 'categories'))
     const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     return NextResponse.json({ categories })
-    */
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 })
   }

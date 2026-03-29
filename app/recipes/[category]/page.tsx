@@ -5,8 +5,8 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { RecipeCard } from '@/components/recipe/recipe-card'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { fetchCategoryBySlug, fetchRecipesByCategory } from '@/lib/api'
-import { categories } from '@/lib/dummy-data'
+import { fetchCategoryBySlug, fetchRecipesByCategory, fetchAllCategories } from '@/lib/api'
+
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>
@@ -32,7 +32,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export async function generateStaticParams() {
-  return categories.map((category) => ({
+  const categories = await fetchAllCategories()
+  if (!categories || !Array.isArray(categories)) return []
+  return categories.map((category: any) => ({
     category: category.slug,
   }))
 }

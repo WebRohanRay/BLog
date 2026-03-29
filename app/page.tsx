@@ -15,6 +15,8 @@ import {
   fetchLatestBlogs,
 } from '@/lib/api'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const [featuredRecipes, latestRecipes, categories, latestBlogs] = await Promise.all([
     fetchFeaturedRecipes(),

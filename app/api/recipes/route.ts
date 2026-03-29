@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dummyRecipes } from '@/lib/dummy-data'
+// import { recipes } from '@/lib/dummy-data'
+import { db } from '@/lib/firebase'
+import { collection, getDocs, addDoc, query, where, orderBy, limit } from 'firebase/firestore'
 // Firebase imports for when you're ready to use real data
 // import { db } from '@/lib/firebase'
 // import { collection, getDocs, addDoc, query, where, orderBy, limit } from 'firebase/firestore'
@@ -13,56 +15,29 @@ export async function GET(request: NextRequest) {
 
   try {
     // Using dummy data - replace with Firebase when ready
-    let recipes = [...dummyRecipes]
-
-    // Filter by category
-    if (category) {
-      recipes = recipes.filter(r => r.category === category)
-    }
-
-    // Filter by featured
-    if (featured === 'true') {
-      recipes = recipes.filter(r => r.featured)
-    }
-
-    // Search filter
-    if (search) {
-      const searchLower = search.toLowerCase()
-      recipes = recipes.filter(r => 
-        r.title.toLowerCase().includes(searchLower) ||
-        r.description.toLowerCase().includes(searchLower) ||
-        r.tags.some(tag => tag.toLowerCase().includes(searchLower))
-      )
-    }
-
-    // Limit results
-    if (limitParam) {
-      recipes = recipes.slice(0, parseInt(limitParam))
-    }
-
-    return NextResponse.json({ recipes, total: recipes.length })
-
-    /* Firebase implementation:
+    // Firestore implementation:
     const recipesRef = collection(db, 'recipes')
     let q = query(recipesRef, orderBy('createdAt', 'desc'))
-    
     if (category) {
       q = query(q, where('category', '==', category))
     }
-    
     if (featured === 'true') {
       q = query(q, where('featured', '==', true))
     }
-    
     if (limitParam) {
       q = query(q, limit(parseInt(limitParam)))
     }
-    
     const snapshot = await getDocs(q)
-    const recipes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    
-    return NextResponse.json({ recipes, total: recipes.length })
-    */
+    let recipesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    if (search) {
+      const searchLower = search.toLowerCase()
+      recipesList = recipesList.filter(r => 
+        r.title.toLowerCase().includes(searchLower) ||
+        r.description.toLowerCase().includes(searchLower) ||
+        (r.tags && r.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+      )
+    }
+    return NextResponse.json({ recipes: recipesList, total: recipesList.length })
   } catch (error) {
     console.error('Error fetching recipes:', error)
     return NextResponse.json({ error: 'Failed to fetch recipes' }, { status: 500 })

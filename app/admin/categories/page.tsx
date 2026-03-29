@@ -4,27 +4,57 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Edit, Trash2, Loader2, Save } from 'lucide-react'
+import { Plus, Edit, Trash2, Loader2, Save, Database } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { categories as dummyCategories } from '@/lib/dummy-data'
+import { categories as dummyCategories, Category } from '@/lib/dummy-data'
+import { ImageUpload } from '@/components/admin/image-upload'
+import { createCategory, updateCategory, deleteCategory, fetchAllCategories } from '@/lib/api'
 
 export default function AdminCategoriesPage() {
   const { isAdmin, loading } = useAuth();
-  const [categories, setCategories] = useState(dummyCategories)
+  const [categories, setCategories] = useState<Category[]>([])
   const [formLoading, setFormLoading] = useState(false)
-  const [form, setForm] = useState({ name: '', slug: '' })
+  const [form, setForm] = useState({ name: '', slug: '', seoIntro: '', image: '' })
   const [editing, setEditing] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [migrating, setMigrating] = useState(false)
 
-  // In real app, fetch categories from API
-  // useEffect(() => { ... }, [])
+  const loadCategories = async () => {
+    try {
+      const cats = await fetchAllCategories()
+      setCategories(cats)
+    } catch {
+      toast.error('Failed to load categories')
+      setCategories(dummyCategories)
+    }
+  }
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setForm({ ...form, [name]: value, slug: name === 'name' ? value.toLowerCase().replace(/[^a-z0-9]+/g, '-') : form.slug })
+  }
+
+  const handleMigrate = async () => {
+    setMigrating(true)
+    try {
+      for (const cat of dummyCategories) {
+        await createCategory(cat)
+      }
+      toast.success('Successfully migrated dummy data to Firebase!')
+      loadCategories()
+    } catch (e) {
+      toast.error('Failed to migrate data')
+      console.error(e)
+    } finally {
+      setMigrating(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,17 +62,20 @@ export default function AdminCategoriesPage() {
     setFormLoading(true)
     try {
       if (editing) {
-        // Update category (dummy)
-        setCategories(categories.map(cat => cat.slug === editing ? { ...cat, ...form } : cat))
+        await updateCategory(editing, form)
         toast.success('Category updated!')
       } else {
-        // Add category (dummy)
-        setCategories([...categories, { ...form }])
+        await createCategory({
+          ...form,
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString()
+        } as Category)
         toast.success('Category added!')
       }
-      setForm({ name: '', slug: '' })
+      setForm({ name: '', slug: '', seoIntro: '', image: '' })
       setEditing(null)
       setFormOpen(false)
+      loadCategories()
     } catch {
       toast.error('Failed to save category')
     } finally {
@@ -50,15 +83,20 @@ export default function AdminCategoriesPage() {
     }
   }
 
-  const handleEdit = (cat: { name: string; slug: string }) => {
-    setForm(cat)
+  const handleEdit = (cat: any) => {
+    setForm({ name: cat.name, slug: cat.slug, seoIntro: cat.seoIntro || '', image: cat.image || '' })
     setEditing(cat.slug)
     setFormOpen(true)
   }
 
-  const handleDelete = (slug: string) => {
-    setCategories(categories.filter(cat => cat.slug !== slug))
-    toast.success('Category deleted!')
+  const handleDelete = async (slug: string) => {
+    try {
+      await deleteCategory(slug)
+      toast.success('Category deleted!')
+      loadCategories()
+    } catch {
+      toast.error('Failed to delete category')
+    }
   }
 
   if (loading) {
@@ -74,9 +112,15 @@ export default function AdminCategoriesPage() {
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground">Categories</h1>
           <p className="text-muted-foreground mt-1">Manage recipe/blog categories</p>
         </div>
-        <Button onClick={() => { setFormOpen(true); setForm({ name: '', slug: '' }); setEditing(null); }}>
-          <Plus className="w-4 h-4 mr-2" /> New Category
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleMigrate} disabled={migrating}>
+            <Database className="w-4 h-4 mr-2" /> 
+            {migrating ? 'Migrating...' : 'Migrate Dummy Data'}
+          </Button>
+          <Button onClick={() => { setFormOpen(true); setForm({ name: '', slug: '', seoIntro: '', image: '' }); setEditing(null); }}>
+            <Plus className="w-4 h-4 mr-2" /> New Category
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -119,14 +163,33 @@ export default function AdminCategoriesPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <h2 className="text-xl font-bold mb-2">{editing ? 'Edit' : 'Add'} Category</h2>
               <div>
-                <label className="block mb-1 font-medium" htmlFor="name">Name</label>
+                <label className="block mb-1 font-medium text-sm" htmlFor="name">Name</label>
                 <Input id="name" name="name" value={form.name} onChange={handleInput} required />
               </div>
               <div>
-                <label className="block mb-1 font-medium" htmlFor="slug">Slug</label>
+                <label className="block mb-1 font-medium text-sm" htmlFor="slug">Slug</label>
                 <Input id="slug" name="slug" value={form.slug} onChange={handleInput} required />
               </div>
-              <div className="flex gap-2 justify-end">
+              <div>
+                <label className="block mb-1 font-medium text-sm" htmlFor="seoIntro">SEO Description</label>
+                <textarea
+                  id="seoIntro"
+                  name="seoIntro"
+                  value={form.seoIntro}
+                  onChange={(e) => setForm({ ...form, seoIntro: e.target.value })}
+                  className="w-full flex min-h-[80px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium text-sm">Image</label>
+                <ImageUpload
+                  value={form.image}
+                  onChange={(url) => setForm({ ...form, image: url })}
+                  aspectRatio="video"
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
                 <Button type="button" variant="outline" onClick={() => { setFormOpen(false); setEditing(null); }}>Cancel</Button>
                 <Button type="submit" disabled={formLoading}>
                   {formLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}

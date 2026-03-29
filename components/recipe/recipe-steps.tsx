@@ -45,7 +45,12 @@ export function RecipeSteps({ steps, recipeId, recipeTitle }: RecipeStepsProps) 
     })
   }
 
-  const progress = (completedSteps.length / steps.length) * 100
+  // Filter out any stale steps from sessionStorage that no longer exist
+  const validCompletedSteps = completedSteps.filter((n) =>
+    steps.some((s) => s.stepNumber === n)
+  )
+
+  const progress = steps.length > 0 ? (validCompletedSteps.length / steps.length) * 100 : 0
 
   const phases = ['prep', 'cooking', 'finishing'] as const
   const phaseLabels = { prep: 'Preparation', cooking: 'Cooking', finishing: 'Finishing' }
@@ -66,7 +71,7 @@ export function RecipeSteps({ steps, recipeId, recipeTitle }: RecipeStepsProps) 
       <div className="mb-6">
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
           <span>
-            {completedSteps.length} of {steps.length} steps complete
+            {validCompletedSteps.length} of {steps.length} steps complete
           </span>
           <span>{Math.round(progress)}%</span>
         </div>
@@ -80,9 +85,9 @@ export function RecipeSteps({ steps, recipeId, recipeTitle }: RecipeStepsProps) 
 
       {/* Jump to Step Pills */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {steps.map((step) => (
+        {steps.map((step, index) => (
           <button
-            key={step.stepNumber}
+            key={`pill-${index}`}
             onClick={() =>
               document.getElementById(`step-${step.stepNumber}`)?.scrollIntoView({ behavior: 'smooth' })
             }
@@ -115,9 +120,9 @@ export function RecipeSteps({ steps, recipeId, recipeTitle }: RecipeStepsProps) 
             </div>
 
             {/* Phase Steps */}
-            {phaseSteps.map((step) => (
+            {phaseSteps.map((step, index) => (
               <StepCard
-                key={step.stepNumber}
+                key={`card-${index}`}
                 step={step}
                 recipeTitle={recipeTitle}
                 completed={completedSteps.includes(step.stepNumber)}
@@ -333,7 +338,9 @@ function CookMode({ steps, currentStep, setCurrentStep, onExit, recipeTitle }: C
     // Request wake lock
     const requestWakeLock = async () => {
       try {
-        wakeLockRef.current = await navigator.wakeLock.request('screen')
+        if (navigator.wakeLock) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        }
       } catch {
         // Graceful fallback
       }

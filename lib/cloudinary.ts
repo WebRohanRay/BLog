@@ -41,8 +41,6 @@ export async function uploadToCloudinary(file: File): Promise<UploadResult> {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-    formData.append('folder', 'spice-and-simmer/recipes')
-
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
       {
@@ -52,7 +50,9 @@ export async function uploadToCloudinary(file: File): Promise<UploadResult> {
     )
 
     if (!response.ok) {
-      throw new Error('Upload failed')
+      const errorText = await response.text()
+      console.error('Cloudinary API Error:', errorText)
+      throw new Error(`Upload failed: ${errorText}`)
     }
 
     const data: CloudinaryUploadResponse = await response.json()
