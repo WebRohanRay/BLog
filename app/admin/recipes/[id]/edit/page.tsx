@@ -1,0 +1,490 @@
+'use client'
+
+import { useState, useEffect, use } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Plus, Trash2, GripVertical, Loader2, Save } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
+import { categories, recipes as dummyRecipes } from '@/lib/dummy-data'
+import { ImageUpload } from '@/components/admin/image-upload'
+// Firebase imports
+// import { db } from '@/lib/firebase'
+// import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+export default function EditRecipePage({ params }: PageProps) {
+  const { id } = use(params)
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
+  const [formData, setFormData] = useState({
+    title: '',
+    category: '',
+    difficulty: 'Easy',
+    prepTime: '',
+    cookTime: '',
+    servings: '',
+    featured: false,
+    status: 'draft',
+    image: '',
+    imagePublicId: '',
+    metaDescription: '',
+    description: '',
+    ingredients: [{ item: '', amount: '', unit: '' }],
+    steps: [{ phase: 'prep', title: '', description: '', tip: '' }],
+  })
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        // Using dummy data - replace with Firebase
+        const recipe = dummyRecipes.find(r => r.id === id)
+        
+        if (recipe) {
+          setFormData({
+            title: recipe.title,
+            category: recipe.category,
+            difficulty: recipe.difficulty,
+            prepTime: recipe.prepTime.toString(),
+            cookTime: recipe.cookTime.toString(),
+            servings: recipe.servings.toString(),
+            featured: recipe.featured,
+            status: recipe.status,
+            image: recipe.image,
+            imagePublicId: '',
+            metaDescription: recipe.metaDescription || '',
+            description: recipe.description,
+            ingredients: recipe.ingredients.map(ing => ({
+              item: ing.item,
+              amount: ing.amount,
+              unit: ing.unit || ''
+            })),
+            steps: recipe.steps.map(step => ({
+              phase: step.phase || 'cooking',
+              title: step.title,
+              description: step.description,
+              tip: step.tip || ''
+            })),
+          })
+        }
+
+        /* Firebase implementation:
+        const docRef = doc(db, 'recipes', id)
+        const docSnap = await getDoc(docRef)
+        
+        if (docSnap.exists()) {
+          const recipe = docSnap.data()
+          setFormData({
+            title: recipe.title,
+            category: recipe.category,
+            // ... map all fields
+          })
+        }
+        */
+      } catch (error) {
+        console.error('Error fetching recipe:', error)
+        toast.error('Failed to load recipe')
+      } finally {
+        setFetching(false)
+      }
+    }
+
+    fetchRecipe()
+  }, [id])
+
+  const addIngredient = () => {
+    setFormData({
+      ...formData,
+      ingredients: [...formData.ingredients, { item: '', amount: '', unit: '' }],
+    })
+  }
+
+  const removeIngredient = (index: number) => {
+    setFormData({
+      ...formData,
+      ingredients: formData.ingredients.filter((_, i) => i !== index),
+    })
+  }
+
+  const updateIngredient = (index: number, field: string, value: string) => {
+    const updated = [...formData.ingredients]
+    updated[index] = { ...updated[index], [field]: value }
+    setFormData({ ...formData, ingredients: updated })
+  }
+
+  const addStep = () => {
+    setFormData({
+      ...formData,
+      steps: [...formData.steps, { phase: 'cooking', title: '', description: '', tip: '' }],
+    })
+  }
+
+  const removeStep = (index: number) => {
+    setFormData({
+      ...formData,
+      steps: formData.steps.filter((_, i) => i !== index),
+    })
+  }
+
+  const updateStep = (index: number, field: string, value: string) => {
+    const updated = [...formData.steps]
+    updated[index] = { ...updated[index], [field]: value }
+    setFormData({ ...formData, steps: updated })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      // API call to update recipe
+      const response = await fetch(`/api/recipes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          prepTime: parseInt(formData.prepTime),
+          cookTime: parseInt(formData.cookTime),
+          servings: parseInt(formData.servings),
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update recipe')
+
+      toast.success('Recipe updated successfully!')
+      router.push('/admin/recipes')
+    } catch (error) {
+      console.error('Error updating recipe:', error)
+      toast.error('Failed to update recipe')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-4xl">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/admin/recipes">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-2xl font-serif font-bold text-foreground">
+            Edit Recipe
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Update recipe details
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="title">Recipe Title</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="e.g., Butter Chicken Tacos"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Brief description of the recipe..."
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.slug} value={cat.slug}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="difficulty">Difficulty</Label>
+                <Select
+                  value={formData.difficulty}
+                  onValueChange={(value) => setFormData({ ...formData, difficulty: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Easy">Easy</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="prepTime">Prep Time (min)</Label>
+                <Input
+                  id="prepTime"
+                  type="number"
+                  value={formData.prepTime}
+                  onChange={(e) => setFormData({ ...formData, prepTime: e.target.value })}
+                  placeholder="15"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cookTime">Cook Time (min)</Label>
+                <Input
+                  id="cookTime"
+                  type="number"
+                  value={formData.cookTime}
+                  onChange={(e) => setFormData({ ...formData, cookTime: e.target.value })}
+                  placeholder="30"
+                />
+              </div>
+              <div>
+                <Label htmlFor="servings">Servings</Label>
+                <Input
+                  id="servings"
+                  type="number"
+                  value={formData.servings}
+                  onChange={(e) => setFormData({ ...formData, servings: e.target.value })}
+                  placeholder="4"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Recipe Image</Label>
+              <ImageUpload
+                value={formData.image}
+                onChange={(url) => setFormData({ ...formData, image: url })}
+                onPublicIdChange={(id) => setFormData({ ...formData, imagePublicId: id })}
+                aspectRatio="video"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Ingredients */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Ingredients</CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
+              <Plus className="w-4 h-4 mr-1" />
+              Add
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {formData.ingredients.map((ingredient, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
+                <Input
+                  placeholder="Amount"
+                  value={ingredient.amount}
+                  onChange={(e) => updateIngredient(index, 'amount', e.target.value)}
+                  className="w-20"
+                />
+                <Input
+                  placeholder="Unit"
+                  value={ingredient.unit}
+                  onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
+                  className="w-24"
+                />
+                <Input
+                  placeholder="Ingredient"
+                  value={ingredient.item}
+                  onChange={(e) => updateIngredient(index, 'item', e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeIngredient(index)}
+                  disabled={formData.ingredients.length === 1}
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Steps */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Instructions</CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={addStep}>
+              <Plus className="w-4 h-4 mr-1" />
+              Add Step
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {formData.steps.map((step, index) => (
+              <div key={index} className="border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
+                      {index + 1}
+                    </span>
+                    <Select
+                      value={step.phase}
+                      onValueChange={(value) => updateStep(index, 'phase', value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="prep">Prep</SelectItem>
+                        <SelectItem value="cooking">Cooking</SelectItem>
+                        <SelectItem value="finishing">Finishing</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeStep(index)}
+                    disabled={formData.steps.length === 1}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+                <Input
+                  placeholder="Step title"
+                  value={step.title}
+                  onChange={(e) => updateStep(index, 'title', e.target.value)}
+                  className="mb-2"
+                />
+                <Textarea
+                  placeholder="Step description..."
+                  value={step.description}
+                  onChange={(e) => updateStep(index, 'description', e.target.value)}
+                  rows={3}
+                  className="mb-2"
+                />
+                <Input
+                  placeholder="Pro tip (optional)"
+                  value={step.tip}
+                  onChange={(e) => updateStep(index, 'tip', e.target.value)}
+                />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* SEO */}
+        <Card>
+          <CardHeader>
+            <CardTitle>SEO & Publishing</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="metaDescription">Meta Description</Label>
+              <Textarea
+                id="metaDescription"
+                value={formData.metaDescription}
+                onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+                placeholder="Brief description for search engines (150-160 characters)"
+                rows={2}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="featured">Featured Recipe</Label>
+                <p className="text-xs text-muted-foreground">Show on homepage</p>
+              </div>
+              <Switch
+                id="featured"
+                checked={formData.featured}
+                onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3">
+          <Link href="/admin/recipes">
+            <Button variant="outline" type="button">Cancel</Button>
+          </Link>
+          <Button type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Update Recipe
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}

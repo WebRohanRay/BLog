@@ -1,0 +1,102 @@
+import type { Metadata, Viewport } from 'next'
+import { Playfair_Display, Source_Sans_3 } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+import { Toaster } from 'sonner'
+import './globals.css'
+
+const playfair = Playfair_Display({ 
+  subsets: ['latin'],
+  variable: '--font-playfair',
+  display: 'swap',
+})
+
+const sourceSans = Source_Sans_3({ 
+  subsets: ['latin'],
+  variable: '--font-source-sans',
+  display: 'swap',
+})
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Spice & Simmer | Indian-American Fusion Recipes',
+    template: '%s | Spice & Simmer',
+  },
+  description: 'Bold, flavorful Indian-American fusion recipes for busy home cooks. Easy weeknight dinners, meal prep ideas, and delicious comfort food with a spicy twist.',
+  keywords: ['indian recipes', 'american fusion', 'easy recipes', 'weeknight dinners', 'spicy food', 'comfort food'],
+  authors: [{ name: 'Priya Sharma' }],
+  creator: 'Spice & Simmer',
+  publisher: 'Spice & Simmer',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://spiceandsimmer.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: '/',
+    siteName: 'Spice & Simmer',
+    title: 'Spice & Simmer | Indian-American Fusion Recipes',
+    description: 'Bold, flavorful Indian-American fusion recipes for busy home cooks.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Spice & Simmer - Indian-American Fusion Recipes',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Spice & Simmer | Indian-American Fusion Recipes',
+    description: 'Bold, flavorful Indian-American fusion recipes for busy home cooks.',
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },
+      { url: '/icon-dark-32x32.png', media: '(prefers-color-scheme: dark)' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-icon.png',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#e86a33' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1412' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <html lang="en" className={`${playfair.variable} ${sourceSans.variable}`}>
+      <body className="font-sans antialiased min-h-screen flex flex-col">
+        {children}
+        <Toaster position="bottom-right" richColors />
+        <Analytics />
+      </body>
+    </html>
+  )
+}
