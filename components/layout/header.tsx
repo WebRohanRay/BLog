@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils'
 
 const navLinks = [
   { href: '/recipes', label: 'Recipes' },
-  { href: '/recipes/main-dishes', label: 'Main Dishes' },
   { href: '/recipes/appetizers', label: 'Appetizers' },
   { href: '/recipes/desserts', label: 'Desserts' },
   { href: '/blog', label: 'Blog' },
