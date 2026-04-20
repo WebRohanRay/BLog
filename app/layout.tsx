@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'Admin' }],
   creator: 'Spice & Simmer',
   publisher: 'Spice & Simmer',
+  other: {
+    'google-adsense-account': 'ca-pub-7594101639104127',
+  },
   formatDetection: {
     email: false,
     address: false,
