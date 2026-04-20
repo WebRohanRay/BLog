@@ -5,6 +5,7 @@ export interface Recipe {
   id: string
   title: string
   slug: string
+  description: string
   category: string
   subcategory?: string
   author: { name: string; uid: string }
@@ -186,6 +187,7 @@ export const recipes: Recipe[] = [
     id: '1',
     title: 'Butter Chicken Tacos',
     slug: 'easy-butter-chicken-tacos-recipe',
+    description: 'These butter chicken tacos are what happens when cozy North Indian comfort meets weeknight taco energy. Tender chicken is simmered in a velvety tomato-butter sauce with warm garam masala, then tucked into soft tortillas with crisp onions, fresh cilantro, and a squeeze of lime. You get smoky spice, creamy richness, and bright crunch in every bite. It is a bold Indian-Western fusion recipe that feels restaurant-worthy but comes together with practical pantry ingredients.',
     category: 'main-dishes',
     subcategory: 'tacos',
     author: { name: 'Priya Sharma', uid: 'admin1' },
@@ -306,6 +308,7 @@ export const recipes: Recipe[] = [
     id: '2',
     title: 'Tikka Masala Mac and Cheese',
     slug: 'best-tikka-masala-mac-cheese-recipe',
+    description: 'This tikka masala mac and cheese turns a classic comfort favorite into a deeply flavorful bowl of modern fusion food. Creamy cheddar sauce gets layered with aromatic tikka masala, garlic, and warm paprika, coating every curve of pasta with rich, spiced silkiness. The flavor is familiar enough for kids, exciting enough for dinner guests, and perfect for nights when you want comfort with personality. One bite and plain mac feels like a missed opportunity.',
     category: 'main-dishes',
     subcategory: 'pasta',
     author: { name: 'Priya Sharma', uid: 'admin1' },
@@ -418,6 +421,7 @@ export const recipes: Recipe[] = [
     id: '3',
     title: 'Tandoori Grilled Chicken Wings',
     slug: 'quick-tandoori-grilled-chicken-wings-recipe',
+    description: 'These tandoori grilled chicken wings are smoky, tangy, and packed with layered spice from a yogurt-based marinade. As they hit high heat, the edges char beautifully while the inside stays juicy and tender. Serve them with mint chutney and lemon for the kind of appetizer that disappears in minutes at game night, potlucks, or weekend cookouts. It is an easy Indian fusion starter with serious flavor impact and minimal fuss.',
     category: 'appetizers',
     author: { name: 'Priya Sharma', uid: 'admin1' },
     ingredients: [
@@ -528,6 +532,7 @@ export const recipes: Recipe[] = [
     id: '4',
     title: 'Mango Lassi Smoothie Bowl',
     slug: 'easy-mango-lassi-smoothie-bowl-recipe',
+    description: 'This mango lassi smoothie bowl brings together the nostalgic flavor of classic mango lassi and the fresh texture play of modern breakfast bowls. Frozen mango and creamy yogurt blend into a thick, chilled base scented with cardamom, then topped with granola, berries, and coconut for crunch and contrast. It is bright, cooling, and naturally sweet, making it ideal for warm mornings or post-workout fuel. Think tropical dessert vibes with breakfast nutrition.',
     category: 'breakfast',
     author: { name: 'Priya Sharma', uid: 'admin1' },
     ingredients: [
@@ -623,6 +628,7 @@ export const recipes: Recipe[] = [
     id: '5',
     title: 'Masala Chai Brownies',
     slug: 'best-masala-chai-brownies-recipe',
+    description: 'Masala chai brownies combine dark chocolate intensity with the warming perfume of cardamom, cinnamon, ginger, and clove. The result is fudgy, rich, and unexpectedly elegant, like your favorite cafe drink transformed into a bake-sale showstopper. Brewed chai deepens the batter while spice warmth lingers on the finish, giving each square a signature flavor you cannot get from standard brownies. This dessert is a standout example of Indian-Western fusion done right.',
     category: 'desserts',
     author: { name: 'Priya Sharma', uid: 'admin1' },
     ingredients: [
@@ -738,6 +744,7 @@ export const recipes: Recipe[] = [
     id: '6',
     title: 'Turmeric Golden Latte',
     slug: 'easy-turmeric-golden-latte-recipe',
+    description: 'This turmeric golden latte is a soothing, spice-forward drink made for slow mornings and evening wind-downs. Turmeric, cinnamon, ginger, and black pepper are whisked into warm milk for a cozy cup that tastes earthy, gently sweet, and aromatic. A touch of honey rounds the edges, while black pepper boosts turmeric absorption for added functional benefits. It is simple, comforting, and one of the easiest ways to bring modern Indian-inspired wellness into your daily routine.',
     category: 'drinks',
     author: { name: 'Priya Sharma', uid: 'admin1' },
     ingredients: [
@@ -831,23 +838,230 @@ export const recipes: Recipe[] = [
 ]
 
 // Blogs
+const blogContentBySlug: Record<string, string> = {
+  'art-of-balancing-spices-beginners-guide': `<p>Most spice mistakes happen for one reason: we season once, then hope for the best. Great Indian cooking works in layers, not in one dramatic scoop.</p>
+<h2>A simple spice framework</h2>
+<ul>
+<li><strong>Base:</strong> cumin, coriander, turmeric for structure</li>
+<li><strong>Top note:</strong> cardamom, kasuri methi, or fresh herbs for aroma</li>
+<li><strong>Heat:</strong> chili powder or black pepper, added in small doses</li>
+</ul>
+<h2>How to balance without overthinking</h2>
+<p>Toast whole spices for 30 to 60 seconds in hot fat, then build onion, ginger, and garlic on top. Taste at three moments: after blooming spices, after adding tomato or cream, and right before serving. Each stage needs a tiny correction.</p>
+<h3>Quick fix chart</h3>
+<ul>
+<li>Too spicy: add dairy or a small knob of butter</li>
+<li>Too flat: add salt and lemon</li>
+<li>Too bitter: add a pinch of sugar and extra fat</li>
+</ul>
+<p>Once you stop chasing exact teaspoons and start tasting in layers, your food gets dramatically better.</p>`,
+
+  '10-pantry-staples-indian-american-kitchen': `<p>A smart pantry makes weeknight fusion cooking fast. You do not need fifty jars. You need ten reliable ingredients that can flex across cuisines.</p>
+<h2>My top 10 staples</h2>
+<ol>
+<li>Garam masala</li>
+<li>Cumin seeds</li>
+<li>Turmeric</li>
+<li>Kashmiri chili powder</li>
+<li>Kasuri methi</li>
+<li>Basmati rice</li>
+<li>Ghee</li>
+<li>Canned tomatoes</li>
+<li>Chickpeas</li>
+<li>Greek yogurt</li>
+</ol>
+<h2>Why this list works</h2>
+<p>These staples build curries, marinades, sauces, soups, wraps, and even quick pasta dinners. Greek yogurt doubles as marinade and cooling sauce. Canned tomatoes become curry base or shakshuka-style masala. Kasuri methi gives that restaurant finish in seconds.</p>
+<p>With these ten items, you can cook modern Indian meals without last-minute grocery stress.</p>`,
+
+  'meal-prep-sunday-indian-fusion-edition': `<p>Meal prep only fails when it is too rigid. The goal is flexible building blocks, not seven identical containers.</p>
+<h2>Prep in modules</h2>
+<ul>
+<li><strong>Protein:</strong> tandoori chicken or masala chickpeas</li>
+<li><strong>Base:</strong> basmati rice or roasted potatoes</li>
+<li><strong>Sauce:</strong> mint yogurt, makhani, or green chutney</li>
+<li><strong>Crunch:</strong> pickled onions, cabbage slaw, toasted seeds</li>
+</ul>
+<h2>How this saves time</h2>
+<p>The same components become different meals: rice bowl on Monday, wrap on Tuesday, loaded toast on Wednesday. You keep flavor variety without cooking from scratch every night.</p>
+<h3>Best storage rule</h3>
+<p>Keep sauces separate until serving. That single habit protects texture and stops meals from tasting tired by day three.</p>`,
+
+  'why-restaurant-butter-chicken-tastes-better-home-hacks': `<p>Restaurant butter chicken is not magic. It is process: aggressive browning, controlled fat, and balance at the finish.</p>
+<h2>What restaurants do differently</h2>
+<ul>
+<li>Sear protein hard for color before sauce</li>
+<li>Cook tomato base until raw acidity is gone</li>
+<li>Blend for smooth texture</li>
+<li>Finish with butter, cream, and acid</li>
+</ul>
+<h2>Home version that works</h2>
+<p>Use thighs, not breast, for juicier texture. Keep the pan wide to avoid steaming. Add lemon right before serving to wake up richness.</p>
+<p>If your sauce tastes heavy, it usually needs acid and salt, not more spice.</p>`,
+
+  '20-minute-curry-formula-busy-weeknights': `<p>When dinner time is chaos, formulas beat recipes. This one gives you a reliable curry in 20 minutes.</p>
+<h2>The 4-part formula</h2>
+<ol>
+<li><strong>Protein:</strong> paneer, eggs, chicken, or chickpeas</li>
+<li><strong>Base:</strong> onion + garlic + ginger</li>
+<li><strong>Spice:</strong> one blend plus one heat element</li>
+<li><strong>Liquid:</strong> tomato puree or coconut milk</li>
+</ol>
+<h2>Timing map</h2>
+<p>5 minutes for base, 2 minutes for spices, 8 minutes simmer, 5 minutes finish and serve.</p>
+<h3>Finishers that change everything</h3>
+<ul>
+<li>Lemon juice</li>
+<li>Fresh cilantro</li>
+<li>A spoon of yogurt</li>
+</ul>
+<p>Keep this structure and rotate ingredients based on what is in your fridge.</p>`,
+
+  'how-to-build-better-masala-in-10-minutes': `<p>A bland masala is usually undercooked onion plus rushed spice blooming. Fix those two, and your curry base improves instantly.</p>
+<h2>10-minute masala method</h2>
+<ul>
+<li>Cook onions until deeply golden, not pale</li>
+<li>Add ginger-garlic and cook out raw smell</li>
+<li>Bloom dry spices in fat for 20 to 30 seconds</li>
+<li>Add tomato and cook until oil separates slightly</li>
+</ul>
+<h2>Common mistake</h2>
+<p>Adding water too early cools the pan and dulls flavor. Let spices toast first, then control consistency.</p>
+<p>This masala can be batch-cooked and refrigerated for three days.</p>`,
+
+  'meal-prep-for-people-who-hate-meal-prep': `<p>If meal prep feels like a second job, simplify it. You need one hour, one tray, and one sauce.</p>
+<h2>The no-burnout system</h2>
+<ul>
+<li>Roast one tray of mixed vegetables</li>
+<li>Cook one carb base</li>
+<li>Marinate one protein</li>
+<li>Make one all-purpose sauce</li>
+</ul>
+<h2>How to keep meals interesting</h2>
+<p>Change format, not ingredients. Bowl one day, wrap the next, toast topper the third. Same prep, different experience.</p>
+<p>It is less about perfection and more about reducing weekday decisions.</p>`,
+
+  'mistakes-that-make-homemade-naan-dense-dry': `<p>Soft naan needs three things: hydration, rest, and high heat. Miss one, and texture suffers.</p>
+<h2>Top mistakes</h2>
+<ol>
+<li>Too much bench flour while rolling</li>
+<li>Not enough proofing time</li>
+<li>Cold skillet or weak heat</li>
+<li>Skipping final butter brush</li>
+<li>Overcooking for color</li>
+</ol>
+<h2>Quick upgrade</h2>
+<p>Use a cast-iron pan, preheat until very hot, and cook each naan quickly. Finish with butter plus a pinch of flaky salt.</p>
+<p>The goal is puff and char, not dryness.</p>`,
+
+  'how-i-plan-full-dinner-party-menu-without-stress': `<p>A calm host starts with structure. The best menus are built for flow, not complexity.</p>
+<h2>My planning rule</h2>
+<p>One hero dish, two easy sides, one make-ahead dessert. That is it.</p>
+<h2>Balanced menu checklist</h2>
+<ul>
+<li>One rich element</li>
+<li>One fresh and acidic element</li>
+<li>One crunchy texture</li>
+<li>One dish you can reheat without stress</li>
+</ul>
+<h3>Timeline that works</h3>
+<p>Do prep the day before, set table early, and keep final 30 minutes free for plating and breathing room.</p>
+<p>Guests remember warmth and flavor, not how many complicated techniques you used.</p>`,
+
+  'secret-to-crispy-pakora-humid-weather': `<p>Humidity pulls crispness out of fried snacks fast. The fix is in batter design and frying discipline.</p>
+<h2>Crispness formula</h2>
+<ul>
+<li>Besan plus rice flour for crunch</li>
+<li>Thick batter, not pourable batter</li>
+<li>Small frying batches</li>
+<li>Wire rack cooling, not paper towels</li>
+</ul>
+<h2>Temperature target</h2>
+<p>Keep oil around 175 to 180C. Too low gives soggy pakora, too high burns before cooking through.</p>
+<p>Finish with chaat masala right out of oil for maximum aroma.</p>`,
+
+  'air-fryer-samosas-worth-it-or-overhyped': `<p>Air fryer samosas are convenient, but they need technique to avoid dry wrappers.</p>
+<h2>What air fryer does well</h2>
+<ul>
+<li>Fast reheating</li>
+<li>Lower oil use</li>
+<li>Crisp shell without deep frying setup</li>
+</ul>
+<h2>What needs attention</h2>
+<p>Brush wrappers with oil and do a two-stage cook: medium heat first to set structure, high heat at the end for color.</p>
+<h3>Verdict</h3>
+<p>Weeknight convenience winner. For classic street-style shatter crunch, deep fry still wins.</p>`,
+
+  'one-dough-naan-pizza-flatbreads-guide': `<p>One versatile dough can carry three dinners if you change shaping and heat strategy.</p>
+<h2>Master dough basics</h2>
+<ul>
+<li>Slightly high hydration for softness</li>
+<li>At least one hour rest</li>
+<li>Optional overnight cold ferment for flavor</li>
+</ul>
+<h2>How to use it</h2>
+<ul>
+<li><strong>Naan:</strong> skillet plus butter finish</li>
+<li><strong>Pizza:</strong> hot oven and thinner stretch</li>
+<li><strong>Flatbread:</strong> dry pan and quick flip</li>
+</ul>
+<p>This is one of the easiest systems for reducing kitchen effort without repeating the same meal.</p>`,
+
+  'street-food-flavors-at-home-without-deep-frying': `<p>You can keep street-food energy at home without frying every night.</p>
+<h2>Flavor checkpoints</h2>
+<ul>
+<li>Heat: chili or pepper</li>
+<li>Tang: lemon or tamarind</li>
+<li>Crunch: onion, sev, toasted crumbs</li>
+<li>Freshness: cilantro or mint</li>
+</ul>
+<h2>Smart swaps</h2>
+<p>Roast instead of deep fry, then finish aggressively with chutney, masala powder, and acid. The finish gives the street-food personality.</p>
+<p>Technique can change. Flavor impact should not.</p>`,
+
+  'how-to-make-chutneys-that-last-all-week': `<p>Great chutney is not just about taste. It is about stability, texture, and storage habits.</p>
+<h2>Make it last longer</h2>
+<ul>
+<li>Use enough acid from lemon or vinegar</li>
+<li>Add salt early for flavor and preservation</li>
+<li>Store in dry, sterilized jars</li>
+<li>Use clean spoons every time</li>
+</ul>
+<h2>Best prep trick</h2>
+<p>Freeze in ice cube trays for portion control. Pop one cube into bowls, sandwiches, or marinades when needed.</p>
+<p>This keeps flavor bright and reduces food waste.</p>`,
+
+  'build-fusion-taco-bar-in-45-minutes': `<p>A taco bar is the easiest party format when you want impact without kitchen chaos.</p>
+<h2>Fast setup plan</h2>
+<ul>
+<li>Choose two proteins max</li>
+<li>Prep one creamy sauce and one spicy sauce</li>
+<li>Add one crunchy topping and one fresh herb</li>
+<li>Warm tortillas in batches right before serving</li>
+</ul>
+<h2>Line flow matters</h2>
+<p>Arrange station in this order: tortillas, protein, sauces, crunchy toppings, herbs, lime. Guests move faster and tacos stay balanced.</p>
+<p>This format works for family dinners and bigger gatherings alike.</p>`,
+
+  'five-minute-flavor-boosters-i-keep-on-counter': `<p>Some nights need rescue, not a full recipe reboot. Fast flavor boosters can save bland meals in minutes.</p>
+<h2>My 5-minute boosters</h2>
+<ul>
+<li>Toasted cumin-chili oil</li>
+<li>Quick lemon-pickled onions</li>
+<li>Mint-cilantro yogurt sauce</li>
+<li>Masala butter for eggs, toast, or vegetables</li>
+</ul>
+<h2>How to use them</h2>
+<p>Add one creamy and one acidic booster to most meals. That combo instantly adds contrast and depth.</p>
+<p>These are small moves, but they create restaurant-level finishing energy at home.</p>`,
+}
+
 export const blogs: Blog[] = [
   {
     id: '1',
     title: 'The Art of Balancing Spices: A Beginner\'s Guide',
     slug: 'art-of-balancing-spices-beginners-guide',
-    content: `<p>When I first started cooking Indian-American fusion dishes, I was terrified of spices. Too much? Too little? Would everything taste like a spice cabinet exploded? Sound familiar?</p>
-    
-<p>The truth is, balancing spices is less about exact measurements and more about understanding how flavors work together. In this guide, I'll share the techniques that transformed me from a spice-phobic cook into someone who confidently layers complex flavors.</p>
-
-<h2>The Foundation: Understanding Spice Categories</h2>
-<p>Think of spices in three categories: warming (cinnamon, cardamom), earthy (cumin, coriander), and heat (chili, black pepper). A well-balanced dish usually includes at least one from each category.</p>
-
-<h2>Start Low, Build Slow</h2>
-<p>My golden rule: you can always add more spices, but you can't take them away. Start with half of what you think you need, taste, and adjust.</p>
-
-<h2>The Toast Test</h2>
-<p>Toasting whole spices in a dry pan releases their essential oils and deepens flavor. When they become fragrant (about 1-2 minutes), they're ready.</p>`,
+    content: blogContentBySlug['art-of-balancing-spices-beginners-guide'],
     excerpt: 'Learn the fundamentals of balancing Indian spices for perfectly flavored dishes every time. A beginner-friendly guide to understanding spice categories and layering techniques.',
     author: { name: 'Priya Sharma', uid: 'admin1' },
     seoTitle: 'The Art of Balancing Spices: A Beginner\'s Guide',
@@ -866,22 +1080,7 @@ export const blogs: Blog[] = [
     id: '2',
     title: '10 Pantry Staples Every Indian-American Kitchen Needs',
     slug: '10-pantry-staples-indian-american-kitchen',
-    content: `<p>Whether you're new to Indian cooking or looking to stock up, having the right pantry staples makes all the difference. Here are my top 10 must-haves.</p>
-
-<h2>1. Garam Masala</h2>
-<p>This warming spice blend is the backbone of countless dishes. Look for a blend with cardamom, cinnamon, cloves, and cumin.</p>
-
-<h2>2. Basmati Rice</h2>
-<p>Long-grain and aromatic, basmati rice is essential for biryanis, pilafs, and everyday meals.</p>
-
-<h2>3. Ghee</h2>
-<p>Clarified butter adds richness and has a high smoke point, perfect for sautéing spices.</p>
-
-<h2>4. Cumin Seeds</h2>
-<p>Whole cumin seeds, toasted in oil, create the flavor base for many dishes.</p>
-
-<h2>5. Turmeric</h2>
-<p>The golden spice adds color, earthy flavor, and health benefits.</p>`,
+    content: blogContentBySlug['10-pantry-staples-indian-american-kitchen'],
     excerpt: 'Stock your kitchen with these essential ingredients for perfect Indian-American fusion cooking. From garam masala to ghee, these staples will transform your dishes.',
     author: { name: 'Priya Sharma', uid: 'admin1' },
     seoTitle: '10 Pantry Staples Every Indian-American Kitchen Needs',
@@ -901,22 +1100,7 @@ export const blogs: Blog[] = [
     title: 'Meal Prep Sunday: Indian Fusion Edition',
     slug: 'meal-prep-sunday-indian-fusion-edition',
     featured: true,
-    content: `<p>Meal prepping doesn't have to mean boring chicken and broccoli. With a little planning, you can enjoy flavorful Indian-American fusion meals all week long.</p>
-
-<h2>The Strategy</h2>
-<p>I prep in layers: proteins, grains, sauces, and fresh components. This modular approach keeps things interesting.</p>
-
-<h2>Sunday Prep List</h2>
-<ul>
-<li>Marinate tandoori chicken (for Monday + Tuesday)</li>
-<li>Cook a big batch of basmati rice</li>
-<li>Make butter chicken sauce (stores for 5 days)</li>
-<li>Prep vegetables for stir-fry</li>
-<li>Mix spice blends for the week</li>
-</ul>
-
-<h2>Storage Tips</h2>
-<p>Sauces keep best in glass containers. Store proteins and grains separately to prevent sogginess.</p>`,
+    content: blogContentBySlug['meal-prep-sunday-indian-fusion-edition'],
     excerpt: 'Master the art of meal prepping with these Indian fusion strategies. Prep once on Sunday and enjoy delicious, flavorful meals all week long.',
     author: { name: 'Priya Sharma', uid: 'admin1' },
     seoTitle: 'Meal Prep Sunday: Indian Fusion Edition',
@@ -929,6 +1113,253 @@ export const blogs: Blog[] = [
     relatedBlogs: ['2'],
     createdAt: '2024-02-05T10:00:00Z',
     publishedAt: '2024-02-05T10:00:00Z',
+  },
+  {
+    id: '4',
+    title: 'Why Restaurant Butter Chicken Tastes Better (And How to Beat It at Home)',
+    slug: 'why-restaurant-butter-chicken-tastes-better-home-hacks',
+    content: blogContentBySlug['why-restaurant-butter-chicken-tastes-better-home-hacks'],
+    excerpt: 'Restaurant-level butter chicken is about heat, fat, and finishing. Learn the exact home technique that changes everything.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'Why Restaurant Butter Chicken Tastes Better at Home',
+    metaDescription: 'Learn the exact cooking tricks restaurants use for richer butter chicken and apply them at home in under an hour.',
+    tags: ['butter-chicken', 'cooking-tips', 'weeknight-dinner'],
+    image: 'https://images.unsplash.com/photo-1604908812830-56a8f1c6cb8f?w=1200&h=800&fit=crop',
+    readingTime: 6,
+    status: 'published',
+    featured: true,
+    relatedRecipes: ['1', '2'],
+    relatedBlogs: ['1', '6'],
+    createdAt: '2024-02-12T10:00:00Z',
+    publishedAt: '2024-02-12T10:00:00Z',
+  },
+  {
+    id: '5',
+    title: 'The 20-Minute Curry Formula for Busy Weeknights',
+    slug: '20-minute-curry-formula-busy-weeknights',
+    content: blogContentBySlug['20-minute-curry-formula-busy-weeknights'],
+    excerpt: 'Use this four-step curry framework to make bold, fast dinners in 20 minutes without sacrificing flavor.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: '20-Minute Curry Formula for Fast Weeknight Dinners',
+    metaDescription: 'A repeatable 20-minute curry framework for busy cooks. Build quick, flavorful Indian-inspired dinners with pantry ingredients.',
+    tags: ['quick-easy', 'curry', 'meal-prep'],
+    image: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=1200&h=800&fit=crop',
+    readingTime: 5,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['1', '3', '6'],
+    relatedBlogs: ['3', '7'],
+    createdAt: '2024-02-20T10:00:00Z',
+    publishedAt: '2024-02-20T10:00:00Z',
+  },
+  {
+    id: '6',
+    title: 'How to Build a Better Masala in 10 Minutes',
+    slug: 'how-to-build-better-masala-in-10-minutes',
+    content: blogContentBySlug['how-to-build-better-masala-in-10-minutes'],
+    excerpt: 'A stronger masala means deeper flavor in every curry. Learn the 10-minute method that fixes bland sauces fast.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'How to Build Better Masala in 10 Minutes',
+    metaDescription: 'Improve your curry base with this fast masala technique. Better browning, smarter spice blooming, and balanced tomato flavor.',
+    tags: ['masala', 'spices', 'technique'],
+    image: 'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=1200&h=800&fit=crop',
+    readingTime: 6,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['1', '2'],
+    relatedBlogs: ['1', '4'],
+    createdAt: '2024-02-27T10:00:00Z',
+    publishedAt: '2024-02-27T10:00:00Z',
+  },
+  {
+    id: '7',
+    title: 'Meal Prep for People Who Hate Meal Prep',
+    slug: 'meal-prep-for-people-who-hate-meal-prep',
+    content: blogContentBySlug['meal-prep-for-people-who-hate-meal-prep'],
+    excerpt: 'Skip rigid meal plans. This practical prep system gives you flexible, flavorful weeknight meals with less effort.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'Easy Meal Prep for People Who Hate Meal Prep',
+    metaDescription: 'A low-stress meal prep approach that focuses on components, not repetitive full meals. Fast dinners, less burnout.',
+    tags: ['meal-prep', 'time-saving', 'weeknight-cooking'],
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&h=800&fit=crop',
+    readingTime: 5,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['3', '4'],
+    relatedBlogs: ['3', '5'],
+    createdAt: '2024-03-05T10:00:00Z',
+    publishedAt: '2024-03-05T10:00:00Z',
+  },
+  {
+    id: '8',
+    title: '5 Mistakes That Make Homemade Naan Dense and Dry',
+    slug: 'mistakes-that-make-homemade-naan-dense-dry',
+    content: blogContentBySlug['mistakes-that-make-homemade-naan-dense-dry'],
+    excerpt: 'Fix dense, dry naan with these five practical adjustments for softer texture and better char at home.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: '5 Reasons Homemade Naan Turns Dense and Dry',
+    metaDescription: 'Troubleshoot homemade naan with practical fixes for dough hydration, resting, skillet heat, and finishing.',
+    tags: ['naan', 'baking', 'troubleshooting'],
+    image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=1200&h=800&fit=crop',
+    readingTime: 4,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['1', '2'],
+    relatedBlogs: ['6', '12'],
+    createdAt: '2024-03-12T10:00:00Z',
+    publishedAt: '2024-03-12T10:00:00Z',
+  },
+  {
+    id: '9',
+    title: 'How I Plan a Full Dinner Party Menu Without Stress',
+    slug: 'how-i-plan-full-dinner-party-menu-without-stress',
+    content: blogContentBySlug['how-i-plan-full-dinner-party-menu-without-stress'],
+    excerpt: 'A practical menu-planning system for dinner parties: one hero dish, balanced sides, and a timeline that keeps you calm.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'Stress-Free Dinner Party Menu Planning Guide',
+    metaDescription: 'Plan a complete dinner party menu with less stress using a simple system for courses, prep timing, and flavor balance.',
+    tags: ['entertaining', 'menu-planning', 'hosting'],
+    image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&h=800&fit=crop',
+    readingTime: 7,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['1', '5'],
+    relatedBlogs: ['2', '15'],
+    createdAt: '2024-03-19T10:00:00Z',
+    publishedAt: '2024-03-19T10:00:00Z',
+  },
+  {
+    id: '10',
+    title: 'The Secret to Crispy Pakora in Humid Weather',
+    slug: 'secret-to-crispy-pakora-humid-weather',
+    content: blogContentBySlug['secret-to-crispy-pakora-humid-weather'],
+    excerpt: 'Humidity-proof your pakora with smarter flour ratios, batter thickness, and frying temperature control.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'How to Keep Pakora Crispy in Humid Weather',
+    metaDescription: 'Prevent soggy pakora with pro frying tips for humidity, oil temperature, batter texture, and post-fry seasoning.',
+    tags: ['snacks', 'frying', 'appetizers'],
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=1200&h=800&fit=crop',
+    readingTime: 4,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['3', '6'],
+    relatedBlogs: ['8', '11'],
+    createdAt: '2024-03-26T10:00:00Z',
+    publishedAt: '2024-03-26T10:00:00Z',
+  },
+  {
+    id: '11',
+    title: 'Air Fryer Samosas: Worth It or Overhyped?',
+    slug: 'air-fryer-samosas-worth-it-or-overhyped',
+    content: blogContentBySlug['air-fryer-samosas-worth-it-or-overhyped'],
+    excerpt: 'A no-hype comparison of air fryer vs deep-fried samosas, plus exact settings to improve air fryer texture.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'Air Fryer Samosas vs Deep Fried: Honest Comparison',
+    metaDescription: 'Are air fryer samosas worth making? Learn the trade-offs, best technique, and how to avoid dry wrappers.',
+    tags: ['air-fryer', 'samosa', 'cooking-comparison'],
+    image: 'https://images.unsplash.com/photo-1601050690117-4ab77f2f2b04?w=1200&h=800&fit=crop',
+    readingTime: 5,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['3'],
+    relatedBlogs: ['10', '14'],
+    createdAt: '2024-04-02T10:00:00Z',
+    publishedAt: '2024-04-02T10:00:00Z',
+  },
+  {
+    id: '12',
+    title: 'How to Use One Dough for Naan, Pizza, and Flatbreads',
+    slug: 'one-dough-naan-pizza-flatbreads-guide',
+    content: blogContentBySlug['one-dough-naan-pizza-flatbreads-guide'],
+    excerpt: 'Make one versatile dough and use it three ways through the week: naan, pizza, and quick flatbreads.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'One Dough for Naan, Pizza, and Flatbreads',
+    metaDescription: 'A practical guide to making one flexible dough for naan, pizza, and flatbreads with simple method changes.',
+    tags: ['dough', 'naan', 'pizza-night'],
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&h=800&fit=crop',
+    readingTime: 6,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['1', '2'],
+    relatedBlogs: ['8', '5'],
+    createdAt: '2024-04-09T10:00:00Z',
+    publishedAt: '2024-04-09T10:00:00Z',
+  },
+  {
+    id: '13',
+    title: 'Street Food Flavors at Home Without Deep Frying Daily',
+    slug: 'street-food-flavors-at-home-without-deep-frying',
+    content: blogContentBySlug['street-food-flavors-at-home-without-deep-frying'],
+    excerpt: 'Keep the bold punch of Indian street food while reducing daily deep frying at home.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'Street Food Flavor at Home Without Deep Frying',
+    metaDescription: 'Capture street food flavor with smart method swaps, finishing garnishes, and layered seasoning.',
+    tags: ['street-food', 'healthy-swaps', 'quick-easy'],
+    image: 'https://images.unsplash.com/photo-1567337710282-00832b415979?w=1200&h=800&fit=crop',
+    readingTime: 5,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['3', '6'],
+    relatedBlogs: ['10', '11'],
+    createdAt: '2024-04-16T10:00:00Z',
+    publishedAt: '2024-04-16T10:00:00Z',
+  },
+  {
+    id: '14',
+    title: 'How to Make Chutneys That Last All Week',
+    slug: 'how-to-make-chutneys-that-last-all-week',
+    content: blogContentBySlug['how-to-make-chutneys-that-last-all-week'],
+    excerpt: 'Make greener, brighter chutneys that stay fresh longer with better storage and freezing techniques.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'Weekly Chutney Prep: Make Chutneys Last Longer',
+    metaDescription: 'Practical chutney prep and storage tips to keep flavors fresh through the week without waste.',
+    tags: ['chutney', 'meal-prep', 'condiments'],
+    image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200&h=800&fit=crop',
+    readingTime: 4,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['4', '6'],
+    relatedBlogs: ['7', '13'],
+    createdAt: '2024-04-23T10:00:00Z',
+    publishedAt: '2024-04-23T10:00:00Z',
+  },
+  {
+    id: '15',
+    title: 'Hosting Friends? Build a Fusion Taco Bar in 45 Minutes',
+    slug: 'build-fusion-taco-bar-in-45-minutes',
+    content: blogContentBySlug['build-fusion-taco-bar-in-45-minutes'],
+    excerpt: 'A fast, guest-friendly plan for an Indian fusion taco bar with minimal stress and maximum flavor.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: 'Fusion Taco Bar Hosting Guide in 45 Minutes',
+    metaDescription: 'Host a crowd with a fast Indian fusion taco bar setup, simple topping system, and practical prep timeline.',
+    tags: ['hosting', 'tacos', 'party-food'],
+    image: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=1200&h=800&fit=crop',
+    readingTime: 6,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['1'],
+    relatedBlogs: ['9', '4'],
+    createdAt: '2024-04-30T10:00:00Z',
+    publishedAt: '2024-04-30T10:00:00Z',
+  },
+  {
+    id: '16',
+    title: 'The 5-Minute Flavor Boosters I Keep on My Counter',
+    slug: 'five-minute-flavor-boosters-i-keep-on-counter',
+    content: blogContentBySlug['five-minute-flavor-boosters-i-keep-on-counter'],
+    excerpt: 'A practical list of fast flavor boosters that rescue plain dinners in minutes.',
+    author: { name: 'Priya Sharma', uid: 'admin1' },
+    seoTitle: '5-Minute Flavor Boosters for Better Weeknight Meals',
+    metaDescription: 'Upgrade simple meals with fast flavor boosters like spice oil, quick pickles, and herb yogurt.',
+    tags: ['cooking-hacks', 'quick-easy', 'flavor'],
+    image: 'https://images.unsplash.com/photo-1528712306091-ed0763094c98?w=1200&h=800&fit=crop',
+    readingTime: 4,
+    status: 'published',
+    featured: false,
+    relatedRecipes: ['2', '4', '6'],
+    relatedBlogs: ['6', '14'],
+    createdAt: '2024-05-07T10:00:00Z',
+    publishedAt: '2024-05-07T10:00:00Z',
   },
 ]
 

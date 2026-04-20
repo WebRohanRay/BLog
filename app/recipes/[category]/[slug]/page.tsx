@@ -257,7 +257,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
               {/* Intro */}
               <p className="text-muted-foreground leading-relaxed mb-8">
-                {recipe.metaDescription}
+                {recipe.description || recipe.metaDescription}
               </p>
 
               {/* Ad Slot */}

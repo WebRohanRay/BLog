@@ -17,7 +17,19 @@ import {
   deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore'
-import { categories as dummyCategories, type Recipe, type Category, type Tag, type Blog, type Comment } from './dummy-data'
+import { categories as dummyCategories, blogs as dummyBlogs, type Recipe, type Category, type Tag, type Blog, type Comment } from './dummy-data'
+
+function sortBlogsByCreatedAtDesc(list: Blog[]): Blog[] {
+  return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+}
+
+function getDummyPublishedBlogs(): Blog[] {
+  return sortBlogsByCreatedAtDesc(dummyBlogs.filter(blog => blog.status === 'published'))
+}
+
+function getDummyAllBlogs(includeDrafts: boolean): Blog[] {
+  return includeDrafts ? sortBlogsByCreatedAtDesc(dummyBlogs) : getDummyPublishedBlogs()
+}
 
 // Re-export types so components can import from @/lib/api
 export type { Recipe, Category, Tag, Blog, Comment }
@@ -167,51 +179,90 @@ export async function fetchAllTags(): Promise<Tag[]> {
 
 // Blog APIs
 export async function fetchBlogBySlug(slug: string): Promise<Blog | null> {
-  const q = query(collection(db, 'blogs'), where('slug', '==', slug), where('status', '==', 'published'))
-  const snapshot = await getDocs(q)
-  if (snapshot.empty) return null
-  const docSnap = snapshot.docs[0]
-  return { id: docSnap.id, ...docSnap.data() } as Blog
+  try {
+    const q = query(collection(db, 'blogs'), where('slug', '==', slug), where('status', '==', 'published'))
+    const snapshot = await getDocs(q)
+    if (!snapshot.empty) {
+      const docSnap = snapshot.docs[0]
+      return { id: docSnap.id, ...docSnap.data() } as Blog
+    }
+  } catch (error) {
+    console.warn('Failed to fetch blog by slug from Firebase, using dummy data.', error)
+  }
+
+  return dummyBlogs.find(blog => blog.slug === slug && blog.status === 'published') ?? null
 }
 
 export async function fetchLatestBlogs(limit: number = 3, featuredOnly: boolean = false): Promise<Blog[]> {
-  const blogsRef = collection(db, 'blogs')
-  let q = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
-  
+  try {
+    const blogsRef = collection(db, 'blogs')
+    let q = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
+
+    if (featuredOnly) {
+      q = query(blogsRef, where('status', '==', 'published'), where('featured', '==', true), orderBy('createdAt', 'desc'), limitFn(limit))
+    }
+
+    const snapshot = await getDocs(q)
+    const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+
+    if (featuredOnly && results.length < limit) {
+      const fallbackQ = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
+      const fallbackSnapshot = await getDocs(fallbackQ)
+      const fallbackResults = fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+      if (fallbackResults.length > 0) return fallbackResults
+    }
+
+    if (results.length > 0) return results
+  } catch (error) {
+    console.warn('Failed to fetch latest blogs from Firebase, using dummy data.', error)
+  }
+
+  const published = getDummyPublishedBlogs()
   if (featuredOnly) {
-    q = query(blogsRef, where('status', '==', 'published'), where('featured', '==', true), orderBy('createdAt', 'desc'), limitFn(limit))
+    const featured = published.filter(blog => blog.featured).slice(0, limit)
+    if (featured.length === limit) return featured
+    const fallback = published.slice(0, limit)
+    return fallback
   }
-  
-  const snapshot = await getDocs(q)
-  const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
-  
-  // If we asked for featured but didn't find enough, fallback to latest (optional, but requested in plan)
-  if (featuredOnly && results.length < limit) {
-    const fallbackQ = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), limitFn(limit))
-    const fallbackSnapshot = await getDocs(fallbackQ)
-    return fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
-  }
-  
-  return results
+
+  return published.slice(0, limit)
 }
 
 export async function fetchAllBlogs(includeDrafts: boolean = false): Promise<Blog[]> {
-  const blogsRef = collection(db, 'blogs')
-  const q = includeDrafts 
-    ? query(blogsRef, orderBy('createdAt', 'desc'))
-    : query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'))
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+  try {
+    const blogsRef = collection(db, 'blogs')
+    const q = includeDrafts
+      ? query(blogsRef, orderBy('createdAt', 'desc'))
+      : query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+    const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+    if (results.length > 0) return results
+  } catch (error) {
+    console.warn('Failed to fetch all blogs from Firebase, using dummy data.', error)
+  }
+
+  return getDummyAllBlogs(includeDrafts)
 }
 
 export async function fetchBlogsPaginated(
   page: number = 1,
   perPage: number = 9
 ): Promise<{ blogs: Blog[]; total: number; totalPages: number }> {
-  const blogsRef = collection(db, 'blogs')
-  const q = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'))
-  const snapshot = await getDocs(q)
-  const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+  let all: Blog[] = []
+
+  try {
+    const blogsRef = collection(db, 'blogs')
+    const q = query(blogsRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+    all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+  } catch (error) {
+    console.warn('Failed to fetch paginated blogs from Firebase, using dummy data.', error)
+  }
+
+  if (all.length === 0) {
+    all = getDummyPublishedBlogs()
+  }
+
   const total = all.length
   const totalPages = Math.max(1, Math.ceil(total / perPage))
   const safePage = Math.min(Math.max(1, page), totalPages)
@@ -221,16 +272,31 @@ export async function fetchBlogsPaginated(
 
 export async function fetchRelatedBlogs(blogIds: string[]): Promise<Blog[]> {
   if (!blogIds || !blogIds.length) return []
-  const q = query(collection(db, 'blogs'), where('__name__', 'in', blogIds))
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+
+  try {
+    const q = query(collection(db, 'blogs'), where('__name__', 'in', blogIds))
+    const snapshot = await getDocs(q)
+    const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog))
+    if (results.length > 0) return results
+  } catch (error) {
+    console.warn('Failed to fetch related blogs from Firebase, using dummy data.', error)
+  }
+
+  return dummyBlogs.filter(blog => blogIds.includes(blog.id) && blog.status === 'published')
 }
 
 export async function fetchBlogById(id: string): Promise<Blog | null> {
-  const docRef = doc(db, 'blogs', id)
-  const docSnap = await getDoc(docRef)
-  if (!docSnap.exists()) return null
-  return { id: docSnap.id, ...docSnap.data() } as Blog
+  try {
+    const docRef = doc(db, 'blogs', id)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Blog
+    }
+  } catch (error) {
+    console.warn('Failed to fetch blog by ID from Firebase, using dummy data.', error)
+  }
+
+  return dummyBlogs.find(blog => blog.id === id) ?? null
 }
 
 export async function createBlog(blogData: any): Promise<string> {

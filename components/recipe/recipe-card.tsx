@@ -55,6 +55,11 @@ export function RecipeCard({ recipe, priority = false, className }: RecipeCardPr
           {recipe.title}
         </h3>
 
+        {/* Description */}
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+          {recipe.description}
+        </p>
+
         {/* Meta */}
         <div className="flex items-center gap-4 text-xs sm:text-sm text-muted-foreground mb-3">
           <div className="flex items-center gap-1">
